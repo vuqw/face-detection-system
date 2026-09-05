@@ -4,4 +4,10 @@ __pycache__/
 
 registered_faces/
 access_snapshots/
+
 access_system.db
+access_log.csv
+
+settings.json
+admin_account.json
+.faceaccess_secret

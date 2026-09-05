@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+
 from deepface import DeepFace
 
 import numpy as np
@@ -13,6 +14,10 @@ from database import (
     create_database,
     log_access as db_log_access,
     is_user_active
+)
+
+from settings import (
+    load_settings
 )
 
 
@@ -48,18 +53,102 @@ os.makedirs(
 
 
 # ==========================================
-# Recognition Settings
+# Settings
 # ==========================================
 
-THRESHOLD = 0.90
+SYSTEM_SETTINGS = load_settings()
 
-MIN_MARGIN = 0.05
 
-REQUIRED_STABLE_TIME = 3.0
+THRESHOLD = float(
+    SYSTEM_SETTINGS[
+        "threshold"
+    ]
+)
 
-LOG_COOLDOWN = 10
+MIN_MARGIN = float(
+    SYSTEM_SETTINGS[
+        "min_margin"
+    ]
+)
 
-RECOGNITION_INTERVAL = 15
+REQUIRED_STABLE_TIME = float(
+    SYSTEM_SETTINGS[
+        "stable_time"
+    ]
+)
+
+LOG_COOLDOWN = int(
+    SYSTEM_SETTINGS[
+        "log_cooldown"
+    ]
+)
+
+RECOGNITION_INTERVAL = int(
+    SYSTEM_SETTINGS[
+        "recognition_interval"
+    ]
+)
+
+CAMERA_INDEX = int(
+    SYSTEM_SETTINGS[
+        "camera_index"
+    ]
+)
+
+
+# Require multiple consecutive
+# real-face checks before recognition.
+LIVENESS_REQUIRED_CHECKS = 2
+
+
+print()
+
+print(
+    "FaceAccess Settings"
+)
+
+print(
+    "-------------------"
+)
+
+print(
+    f"Threshold: {THRESHOLD}"
+)
+
+print(
+    f"Minimum Margin: {MIN_MARGIN}"
+)
+
+print(
+    "Stable Time: "
+    f"{REQUIRED_STABLE_TIME}s"
+)
+
+print(
+    "Log Cooldown: "
+    f"{LOG_COOLDOWN}s"
+)
+
+print(
+    "Recognition Interval: "
+    f"{RECOGNITION_INTERVAL}"
+)
+
+print(
+    "Camera Index: "
+    f"{CAMERA_INDEX}"
+)
+
+print(
+    "Passive Liveness: Enabled"
+)
+
+print(
+    "Liveness Confirmations: "
+    f"{LIVENESS_REQUIRED_CHECKS}"
+)
+
+print()
 
 
 # ==========================================
@@ -70,7 +159,7 @@ create_database()
 
 
 # ==========================================
-# Load Registered Faces
+# Registered Faces
 # ==========================================
 
 def load_registered_faces():
@@ -88,7 +177,6 @@ def load_registered_faces():
     for person_name in os.listdir(
         REGISTERED_DIR
     ):
-
 
         person_dir = os.path.join(
             REGISTERED_DIR,
@@ -139,7 +227,7 @@ def load_registered_faces():
         except Exception as error:
 
             print(
-                f"Could not load "
+                "Could not load "
                 f"{person_name}:",
                 error
             )
@@ -153,14 +241,12 @@ registered_faces = (
 )
 
 
-print()
 print(
     "Registered people:",
     list(
         registered_faces.keys()
     )
 )
-print()
 
 
 # ==========================================
@@ -184,9 +270,13 @@ def cosine_similarity(
 
 
     denominator = (
-        np.linalg.norm(vector1)
+        np.linalg.norm(
+            vector1
+        )
         *
-        np.linalg.norm(vector2)
+        np.linalg.norm(
+            vector2
+        )
     )
 
 
@@ -206,18 +296,105 @@ def cosine_similarity(
 
 
 # ==========================================
-# Save Face Snapshot
+# Liveness
+# ==========================================
+
+def check_liveness(
+    face_crop
+):
+
+    if (
+        face_crop is None
+        or
+        face_crop.size == 0
+    ):
+
+        return (
+            False,
+            0.0
+        )
+
+
+    results = (
+        DeepFace.extract_faces(
+
+            img_path=
+                face_crop,
+
+            detector_backend=
+                "skip",
+
+            enforce_detection=
+                False,
+
+            align=
+                False,
+
+            anti_spoofing=
+                True
+        )
+    )
+
+
+    if not results:
+
+        return (
+            False,
+            0.0
+        )
+
+
+    result = results[0]
+
+
+    is_real = bool(
+        result.get(
+            "is_real",
+            False
+        )
+    )
+
+
+    try:
+
+        score = float(
+            result.get(
+                "antispoof_score",
+                0.0
+            )
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        score = 0.0
+
+
+    return (
+        is_real,
+        score
+    )
+
+
+# ==========================================
+# Snapshot
 # ==========================================
 
 def safe_filename(text):
 
     result = ""
 
-    for character in str(text):
+
+    for character in str(
+        text
+    ):
 
         if (
             character.isalnum()
-            or character in "-_"
+            or
+            character in "-_"
         ):
 
             result += character
@@ -238,7 +415,8 @@ def save_face_snapshot(
 
     if (
         face_crop is None
-        or face_crop.size == 0
+        or
+        face_crop.size == 0
     ):
 
         return None
@@ -267,7 +445,6 @@ def save_face_snapshot(
     safe_name = safe_filename(
         name
     )
-
 
     safe_status = safe_filename(
         status
@@ -299,10 +476,6 @@ def save_face_snapshot(
 
     if not saved:
 
-        print(
-            "Could not save snapshot."
-        )
-
         return None
 
 
@@ -312,18 +485,14 @@ def save_face_snapshot(
     )
 
 
-    # URLs work better with /
-    relative_path = (
-        relative_path
-        .replace("\\", "/")
+    return relative_path.replace(
+        "\\",
+        "/"
     )
 
 
-    return relative_path
-
-
 # ==========================================
-# Logging + Snapshot
+# Access Logging
 # ==========================================
 
 last_logged_key = None
@@ -344,6 +513,7 @@ def log_event(
 
     current_time = time.time()
 
+
     key = (
         name,
         status
@@ -353,20 +523,17 @@ def log_event(
     should_log = False
 
 
-    # Different result?
-    # Log immediately.
-    if (
-        last_logged_key != key
-    ):
+    if last_logged_key != key:
 
         should_log = True
 
 
-    # Same result, but cooldown passed.
     elif (
         current_time
-        - last_log_time
-        >= LOG_COOLDOWN
+        -
+        last_log_time
+        >=
+        LOG_COOLDOWN
     ):
 
         should_log = True
@@ -440,13 +607,16 @@ options = FaceDetectorOptions(
 # Camera
 # ==========================================
 
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(
+    CAMERA_INDEX
+)
 
 
 if not camera.isOpened():
 
     raise SystemExit(
-        "Could not open camera."
+        "Could not open camera "
+        f"index {CAMERA_INDEX}."
     )
 
 
@@ -464,7 +634,14 @@ candidate_name = None
 candidate_start_time = None
 
 
-display_text = "Waiting for face..."
+liveness_streak = 0
+
+last_liveness_score = 0.0
+
+
+display_text = (
+    "Waiting for face..."
+)
 
 display_color = (
     255,
@@ -474,7 +651,7 @@ display_color = (
 
 
 # ==========================================
-# Start Recognition
+# Recognition Loop
 # ==========================================
 
 with FaceDetector.create_from_options(
@@ -538,10 +715,6 @@ with FaceDetector.create_from_options(
         face_detected = False
 
 
-        # ==================================
-        # Face Detected
-        # ==================================
-
         if detection_result.detections:
 
 
@@ -566,14 +739,12 @@ with FaceDetector.create_from_options(
                 0
             )
 
-
             y1 = max(
                 int(
                     bbox.origin_y
                 ),
                 0
             )
-
 
             x2 = min(
                 x1
@@ -583,7 +754,6 @@ with FaceDetector.create_from_options(
                 ),
                 frame.shape[1]
             )
-
 
             y2 = min(
                 y1
@@ -602,31 +772,26 @@ with FaceDetector.create_from_options(
 
 
             cv2.rectangle(
-
                 frame,
-
                 (
                     x1,
                     y1
                 ),
-
                 (
                     x2,
                     y2
                 ),
-
                 (
                     255,
                     255,
                     255
                 ),
-
                 2
             )
 
 
         # ==================================
-        # Run FaceNet every 15 frames
+        # Recognition Cycle
         # ==================================
 
         if (
@@ -637,10 +802,160 @@ with FaceDetector.create_from_options(
             face_crop.size > 0
             and
             frame_count
-            % RECOGNITION_INTERVAL
-            == 0
+            %
+            RECOGNITION_INTERVAL
+            ==
+            0
         ):
 
+
+            # ==============================
+            # Liveness Check
+            # ==============================
+
+            try:
+
+                (
+                    is_real,
+                    liveness_score
+                ) = check_liveness(
+                    face_crop
+                )
+
+
+                last_liveness_score = (
+                    liveness_score
+                )
+
+
+                if not is_real:
+
+
+                    liveness_streak = 0
+
+                    candidate_name = None
+
+                    candidate_start_time = None
+
+
+                    display_text = (
+                        "Spoof Detected - "
+                        "Access Denied "
+                        f"(L:{liveness_score:.3f})"
+                    )
+
+
+                    display_color = (
+                        0,
+                        0,
+                        255
+                    )
+
+
+                    log_event(
+                        "Spoof Attempt",
+                        "Denied",
+                        0.0,
+                        face_crop
+                    )
+
+
+                    # Do NOT perform
+                    # face recognition
+                    # after spoof failure.
+                    continue
+
+
+                liveness_streak += 1
+
+
+                if (
+                    liveness_streak
+                    >
+                    LIVENESS_REQUIRED_CHECKS
+                ):
+
+                    liveness_streak = (
+                        LIVENESS_REQUIRED_CHECKS
+                    )
+
+
+                if (
+                    liveness_streak
+                    <
+                    LIVENESS_REQUIRED_CHECKS
+                ):
+
+
+                    candidate_name = None
+
+                    candidate_start_time = None
+
+
+                    display_text = (
+                        "Checking Liveness "
+                        f"{liveness_streak}/"
+                        f"{LIVENESS_REQUIRED_CHECKS} "
+                        f"(L:{liveness_score:.3f})"
+                    )
+
+
+                    display_color = (
+                        0,
+                        255,
+                        255
+                    )
+
+
+                    continue
+
+
+            except Exception as error:
+
+
+                print(
+                    "Liveness error:",
+                    error
+                )
+
+
+                liveness_streak = 0
+
+                candidate_name = None
+
+                candidate_start_time = None
+
+
+                display_text = (
+                    "Liveness Check Failed - "
+                    "Access Denied"
+                )
+
+
+                display_color = (
+                    0,
+                    0,
+                    255
+                )
+
+
+                log_event(
+                    "Liveness Error",
+                    "Denied",
+                    0.0,
+                    face_crop
+                )
+
+
+                # Fail closed:
+                # never grant access if
+                # liveness cannot be checked.
+                continue
+
+
+            # ==============================
+            # Face Recognition
+            # ==============================
 
             try:
 
@@ -659,7 +974,6 @@ with FaceDetector.create_from_options(
 
                         enforce_detection=
                             False
-
                     )
                 )
 
@@ -673,10 +987,6 @@ with FaceDetector.create_from_options(
 
                 scores = []
 
-
-                # ==========================
-                # Compare to every person
-                # ==========================
 
                 for (
                     person_name,
@@ -696,9 +1006,7 @@ with FaceDetector.create_from_options(
 
                         similarity = (
                             cosine_similarity(
-
                                 current_embedding,
-
                                 saved_embedding
                             )
                         )
@@ -712,8 +1020,6 @@ with FaceDetector.create_from_options(
                     if person_scores:
 
 
-                        # IMPORTANT:
-                        # Best image out of 5
                         person_score = max(
                             person_scores
                         )
@@ -728,17 +1034,11 @@ with FaceDetector.create_from_options(
 
 
                 scores.sort(
-
                     key=lambda item:
                         item[1],
-
                     reverse=True
                 )
 
-
-                # ==========================
-                # Best / Second Best
-                # ==========================
 
                 if scores:
 
@@ -774,37 +1074,40 @@ with FaceDetector.create_from_options(
                 else:
 
 
-                    best_name = "Unknown"
+                    best_name = (
+                        "Unknown"
+                    )
 
                     best_similarity = 0.0
 
                     margin = 0.0
 
 
-                # ==========================
-                # Valid Match
-                # ==========================
-
                 valid_match = (
 
                     best_similarity
-                    >= THRESHOLD
+                    >=
+                    THRESHOLD
 
                     and
 
                     margin
-                    >= MIN_MARGIN
-
+                    >=
+                    MIN_MARGIN
                 )
 
+
+                # ==========================
+                # Valid Identity
+                # ==========================
 
                 if valid_match:
 
 
-                    # New candidate
                     if (
                         candidate_name
-                        != best_name
+                        !=
+                        best_name
                     ):
 
 
@@ -825,13 +1128,10 @@ with FaceDetector.create_from_options(
                     )
 
 
-                    # ======================
-                    # Confirmed
-                    # ======================
-
                     if (
                         stable_time
-                        >= REQUIRED_STABLE_TIME
+                        >=
+                        REQUIRED_STABLE_TIME
                     ):
 
 
@@ -842,8 +1142,9 @@ with FaceDetector.create_from_options(
 
                             display_text = (
                                 f"{best_name} - "
-                                f"Access Granted "
-                                f"({best_similarity:.3f})"
+                                "Access Granted "
+                                f"({best_similarity:.3f}) "
+                                f"[Live:{last_liveness_score:.3f}]"
                             )
 
 
@@ -855,15 +1156,10 @@ with FaceDetector.create_from_options(
 
 
                             log_event(
-
                                 best_name,
-
                                 "Granted",
-
                                 best_similarity,
-
                                 face_crop
-
                             )
 
 
@@ -872,8 +1168,9 @@ with FaceDetector.create_from_options(
 
                             display_text = (
                                 f"{best_name} - "
-                                f"Access Disabled "
-                                f"({best_similarity:.3f})"
+                                "Access Disabled "
+                                f"({best_similarity:.3f}) "
+                                f"[Live:{last_liveness_score:.3f}]"
                             )
 
 
@@ -885,31 +1182,23 @@ with FaceDetector.create_from_options(
 
 
                             log_event(
-
                                 best_name,
-
                                 "Disabled",
-
                                 best_similarity,
-
                                 face_crop
-
                             )
 
-
-                    # ======================
-                    # Still Verifying
-                    # ======================
 
                     else:
 
 
                         display_text = (
-                            f"Verifying "
+                            "Verifying "
                             f"{best_name} "
                             f"{stable_time:.1f}/"
                             f"{REQUIRED_STABLE_TIME:.1f}s "
-                            f"({best_similarity:.3f})"
+                            f"({best_similarity:.3f}) "
+                            f"[Live:{last_liveness_score:.3f}]"
                         )
 
 
@@ -921,7 +1210,7 @@ with FaceDetector.create_from_options(
 
 
                 # ==========================
-                # Unknown / Denied
+                # Unknown Person
                 # ==========================
 
                 else:
@@ -933,9 +1222,10 @@ with FaceDetector.create_from_options(
 
 
                     display_text = (
-                        f"Unknown - "
-                        f"Access Denied "
-                        f"({best_similarity:.3f})"
+                        "Unknown - "
+                        "Access Denied "
+                        f"({best_similarity:.3f}) "
+                        f"[Live:{last_liveness_score:.3f}]"
                     )
 
 
@@ -947,15 +1237,10 @@ with FaceDetector.create_from_options(
 
 
                     log_event(
-
                         "Unknown",
-
                         "Denied",
-
                         best_similarity,
-
                         face_crop
-
                     )
 
 
@@ -974,7 +1259,7 @@ with FaceDetector.create_from_options(
 
 
         # ==================================
-        # No face
+        # No Face
         # ==================================
 
         if not face_detected:
@@ -983,6 +1268,10 @@ with FaceDetector.create_from_options(
             candidate_name = None
 
             candidate_start_time = None
+
+            liveness_streak = 0
+
+            last_liveness_score = 0.0
 
 
             display_text = (
@@ -998,53 +1287,39 @@ with FaceDetector.create_from_options(
 
 
         # ==================================
-        # UI
+        # Top Status Bar
         # ==================================
 
         cv2.rectangle(
-
             frame,
-
             (
                 0,
                 0
             ),
-
             (
                 frame.shape[1],
-                65
+                70
             ),
-
             (
                 20,
                 20,
                 20
             ),
-
             -1
-
         )
 
 
         cv2.putText(
-
             frame,
-
             display_text,
-
             (
-                20,
-                40
+                15,
+                42
             ),
-
             cv2.FONT_HERSHEY_SIMPLEX,
-
-            0.7,
-
+            0.58,
             display_color,
-
             2
-
         )
 
 

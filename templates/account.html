@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Account & Security - FaceAccess</title>
+
+
+    <script>
+
+        const savedTheme =
+            localStorage.getItem(
+                "faceaccess-theme"
+            );
+
+        if (savedTheme) {
+
+            document.documentElement
+                .setAttribute(
+                    "data-theme",
+                    savedTheme
+                );
+
+        }
+
+    </script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        :root {
+
+            --bg: #f4f6fa;
+
+            --surface: #ffffff;
+
+            --surface-soft: #f8fafc;
+
+            --text: #111827;
+
+            --muted: #6b7280;
+
+            --border: #e5e7eb;
+
+            --sidebar: #111827;
+
+            --sidebar-hover: #1f2937;
+
+            --blue: #2563eb;
+
+            --red: #dc2626;
+
+            --red-soft: #fee2e2;
+
+            --green: #16a34a;
+
+            --green-soft: #dcfce7;
+
+        }
+
+
+        html[data-theme="dark"] {
+
+            --bg: #0b0f17;
+
+            --surface: #111827;
+
+            --surface-soft: #18202e;
+
+            --text: #f3f4f6;
+
+            --muted: #9ca3af;
+
+            --border: #273244;
+
+            --sidebar: #080c13;
+
+            --sidebar-hover: #1a2230;
+
+            --red-soft:
+                rgba(
+                    239,
+                    68,
+                    68,
+                    0.13
+                );
+
+            --green-soft:
+                rgba(
+                    34,
+                    197,
+                    94,
+                    0.13
+                );
+
+        }
+
+
+        body {
+
+            margin: 0;
+
+            background:
+                var(--bg);
+
+            color:
+                var(--text);
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+        }
+
+
+        .app {
+
+            min-height: 100vh;
+
+            display: flex;
+
+        }
+
+
+        .sidebar {
+
+            width: 250px;
+
+            position: fixed;
+
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            background:
+                var(--sidebar);
+
+            padding: 28px 20px;
+
+            color: white;
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 38px;
+
+        }
+
+
+        .brand-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #8b5cf6
+                );
+
+            font-size: 21px;
+
+        }
+
+
+        .brand-title {
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+        }
+
+
+        .brand-subtitle {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+        }
+
+
+        .nav-label {
+
+            color: #6b7280;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin:
+                15px
+                10px
+                8px;
+
+        }
+
+
+        .nav-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 12px 14px;
+
+            border-radius: 10px;
+
+            color: #d1d5db;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .nav-item:hover,
+        .nav-item.active {
+
+            color: white;
+
+            background:
+                var(--sidebar-hover);
+
+        }
+
+
+        .sidebar-bottom {
+
+            margin-top: auto;
+
+        }
+
+
+        .theme-button {
+
+            width: 100%;
+
+            border: 0;
+
+            background:
+                var(--sidebar-hover);
+
+            color: white;
+
+            border-radius: 10px;
+
+            padding: 12px 14px;
+
+            cursor: pointer;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+        }
+
+
+        .main {
+
+            margin-left: 250px;
+
+            width:
+                calc(
+                    100% - 250px
+                );
+
+            padding: 35px;
+
+        }
+
+
+        .topbar {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+        }
+
+
+        .subtitle {
+
+            margin-top: 6px;
+
+            color:
+                var(--muted);
+
+            font-size: 14px;
+
+        }
+
+
+        .back-button {
+
+            color:
+                var(--text);
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 9px;
+
+            text-decoration: none;
+
+            padding: 10px 15px;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+        }
+
+
+        .flash {
+
+            background:
+                var(--green-soft);
+
+            color:
+                var(--green);
+
+            border:
+                1px solid
+                var(--border);
+
+            padding: 13px 15px;
+
+            border-radius: 10px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .grid {
+
+            display: grid;
+
+            grid-template-columns:
+                1.4fr 0.8fr;
+
+            gap: 20px;
+
+        }
+
+
+        .card {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 16px;
+
+            overflow: hidden;
+
+        }
+
+
+        .card-header {
+
+            padding: 20px 22px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        .card-title {
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+        }
+
+
+        .card-description {
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+            margin-top: 5px;
+
+            line-height: 1.5;
+
+        }
+
+
+        .card-body {
+
+            padding: 22px;
+
+        }
+
+
+        .account {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .avatar {
+
+            width: 52px;
+            height: 52px;
+
+            border-radius: 15px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #8b5cf6
+                );
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 21px;
+
+            font-weight: 700;
+
+        }
+
+
+        .username {
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+        }
+
+
+        .role {
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+            margin-top: 3px;
+
+        }
+
+
+        .field {
+
+            margin-bottom: 16px;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            font-size: 12px;
+
+            font-weight: 650;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        input {
+
+            width: 100%;
+
+            height: 44px;
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 9px;
+
+            padding: 0 12px;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--text);
+
+            outline: none;
+
+            font-size: 14px;
+
+        }
+
+
+        input:focus {
+
+            border-color:
+                var(--blue);
+
+        }
+
+
+        .hint {
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            margin-top: 6px;
+
+        }
+
+
+        .save-button {
+
+            border: 0;
+
+            border-radius: 9px;
+
+            padding: 11px 17px;
+
+            color: white;
+
+            background:
+                var(--blue);
+
+            font-weight: 650;
+
+            cursor: pointer;
+
+        }
+
+
+        .security-item {
+
+            padding: 15px 0;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        .security-item:first-child {
+
+            padding-top: 0;
+
+        }
+
+
+        .security-item:last-child {
+
+            border-bottom: 0;
+
+        }
+
+
+        .security-title {
+
+            font-size: 13px;
+
+            font-weight: 650;
+
+        }
+
+
+        .security-text {
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            margin-top: 5px;
+
+            line-height: 1.5;
+
+        }
+
+
+        .logout-area {
+
+            margin-top: 20px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid
+                var(--border);
+
+        }
+
+
+        .logout-button {
+
+            width: 100%;
+
+            border:
+                1px solid
+                var(--red);
+
+            color:
+                var(--red);
+
+            background:
+                var(--red-soft);
+
+            padding: 11px 14px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-weight: 650;
+
+        }
+
+
+        @media(max-width:900px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+
+                margin-left: 0;
+
+                width: 100%;
+
+            }
+
+            .grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+        }
+
+
+        @media(max-width:600px) {
+
+            .main {
+
+                padding: 20px;
+
+            }
+
+            .topbar {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+
+                gap: 14px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ◉
+            </div>
+
+            <div>
+
+                <div class="brand-title">
+                    FaceAccess
+                </div>
+
+                <div class="brand-subtitle">
+                    Smart Security
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="nav-label">
+            Main
+        </div>
+
+
+        <a href="/" class="nav-item">
+            ▦ Dashboard
+        </a>
+
+
+        <a href="/users" class="nav-item">
+            👤 Users
+        </a>
+
+
+        <a href="/register" class="nav-item">
+            ＋ Register Person
+        </a>
+
+
+        <div class="nav-label">
+            System
+        </div>
+
+
+        <a href="/logs" class="nav-item">
+            ◫ Access Logs
+        </a>
+
+
+        <a href="/settings" class="nav-item">
+            ⚙ Settings
+        </a>
+
+
+        <a
+            href="/account"
+            class="nav-item active"
+        >
+            🔒 Account & Security
+        </a>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="theme-toggle"
+                class="theme-button"
+                type="button"
+            >
+
+                <span id="theme-text">
+                    Dark Mode
+                </span>
+
+                <span id="theme-icon">
+                    ☾
+                </span>
+
+            </button>
+
+        </div>
+
+
+    </aside>
+
+
+
+    <main class="main">
+
+
+        <div class="topbar">
+
+            <div>
+
+                <h1>
+                    Account & Security
+                </h1>
+
+                <div class="subtitle">
+                    Manage administrator security and active sessions.
+                </div>
+
+            </div>
+
+
+            <a
+                href="/"
+                class="back-button"
+            >
+                ← Dashboard
+            </a>
+
+        </div>
+
+
+
+        {% with messages = get_flashed_messages() %}
+
+            {% if messages %}
+
+                {% for message in messages %}
+
+                    <div class="flash">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+
+        <div class="grid">
+
+
+            <section class="card">
+
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        Change Password
+                    </div>
+
+                    <div class="card-description">
+                        Changing your password will invalidate all previously authenticated sessions.
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+
+                    <div class="account">
+
+                        <div class="avatar">
+                            {{ admin_username[0]|upper }}
+                        </div>
+
+                        <div>
+
+                            <div class="username">
+                                {{ admin_username }}
+                            </div>
+
+                            <div class="role">
+                                System Administrator
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <form method="POST">
+
+
+                        <div class="field">
+
+                            <label>
+                                CURRENT PASSWORD
+                            </label>
+
+                            <input
+                                type="password"
+                                name="current_password"
+                                required
+                                autocomplete="current-password"
+                            >
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                NEW PASSWORD
+                            </label>
+
+                            <input
+                                type="password"
+                                name="new_password"
+                                minlength="8"
+                                required
+                                autocomplete="new-password"
+                            >
+
+                            <div class="hint">
+                                Minimum 8 characters.
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                CONFIRM NEW PASSWORD
+                            </label>
+
+                            <input
+                                type="password"
+                                name="confirm_password"
+                                minlength="8"
+                                required
+                                autocomplete="new-password"
+                            >
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="save-button"
+                        >
+                            Change Password
+                        </button>
+
+
+                    </form>
+
+
+                </div>
+
+            </section>
+
+
+
+            <section class="card">
+
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        Security
+                    </div>
+
+                    <div class="card-description">
+                        Current administrator session protection.
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+
+                    <div class="security-item">
+
+                        <div class="security-title">
+                            Password Protection
+                        </div>
+
+                        <div class="security-text">
+                            Your password is stored using a password hash and is never saved as readable text.
+                        </div>
+
+                    </div>
+
+
+                    <div class="security-item">
+
+                        <div class="security-title">
+                            Protected Images
+                        </div>
+
+                        <div class="security-text">
+                            Registered face photos and access snapshots require an authenticated administrator session.
+                        </div>
+
+                    </div>
+
+
+                    <div class="security-item">
+
+                        <div class="security-title">
+                            Session Lifetime
+                        </div>
+
+                        <div class="security-text">
+                            Administrator sessions remain active for up to 8 hours.
+                        </div>
+
+                    </div>
+
+
+                    <div class="security-item">
+
+                        <div class="security-title">
+                            Password Session Reset
+                        </div>
+
+                        <div class="security-text">
+                            Changing your password automatically invalidates older authenticated sessions.
+                        </div>
+
+                    </div>
+
+
+                    <div class="logout-area">
+
+                        <form
+                            method="POST"
+                            action="/logout"
+                        >
+
+                            <button
+                                type="submit"
+                                class="logout-button"
+                            >
+                                Sign Out
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+
+<script>
+
+
+function updateThemeButton() {
+
+    const dark =
+        document.documentElement
+            .getAttribute(
+                "data-theme"
+            )
+        ===
+        "dark";
+
+
+    document.getElementById(
+        "theme-text"
+    ).textContent =
+        dark
+            ? "Light Mode"
+            : "Dark Mode";
+
+
+    document.getElementById(
+        "theme-icon"
+    ).textContent =
+        dark
+            ? "☀"
+            : "☾";
+
+}
+
+
+document.getElementById(
+    "theme-toggle"
+).addEventListener(
+    "click",
+    () => {
+
+        const current =
+            document.documentElement
+                .getAttribute(
+                    "data-theme"
+                );
+
+
+        const next =
+            current === "dark"
+                ? "light"
+                : "dark";
+
+
+        document.documentElement
+            .setAttribute(
+                "data-theme",
+                next
+            );
+
+
+        localStorage.setItem(
+            "faceaccess-theme",
+            next
+        );
+
+
+        updateThemeButton();
+
+    }
+);
+
+
+updateThemeButton();
+
+
+</script>
+
+
+</body>
+
+</html>

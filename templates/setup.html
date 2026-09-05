@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Setup - FaceAccess</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 25px;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #202b40,
+                    #0b0f17 55%
+                );
+
+            color: #f3f4f6;
+
+        }
+
+
+        .card {
+
+            width: 100%;
+
+            max-width: 430px;
+
+            background: #111827;
+
+            border:
+                1px solid
+                #273244;
+
+            border-radius: 20px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 30px 80px
+                rgba(0,0,0,0.4);
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 28px;
+
+        }
+
+
+        .brand-icon {
+
+            width: 46px;
+            height: 46px;
+
+            border-radius: 13px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #8b5cf6
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 23px;
+
+        }
+
+
+        .brand-name {
+
+            font-size: 18px;
+
+            font-weight: 700;
+
+        }
+
+
+        .brand-subtitle {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+        }
+
+
+        h1 {
+
+            margin:
+                0
+                0
+                8px;
+
+            font-size: 25px;
+
+        }
+
+
+        .description {
+
+            color: #9ca3af;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+            margin-bottom: 24px;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            font-size: 12px;
+
+            font-weight: 650;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        .field {
+
+            margin-bottom: 16px;
+
+        }
+
+
+        input {
+
+            width: 100%;
+
+            height: 45px;
+
+            padding: 0 13px;
+
+            border:
+                1px solid
+                #374151;
+
+            border-radius: 10px;
+
+            background: #18202e;
+
+            color: white;
+
+            outline: none;
+
+            font-size: 14px;
+
+        }
+
+
+        input:focus {
+
+            border-color: #3b82f6;
+
+        }
+
+
+        .hint {
+
+            color: #6b7280;
+
+            font-size: 11px;
+
+            margin-top: 6px;
+
+        }
+
+
+        .flash {
+
+            background:
+                rgba(
+                    239,
+                    68,
+                    68,
+                    0.13
+                );
+
+            color: #f87171;
+
+            border:
+                1px solid
+                rgba(
+                    239,
+                    68,
+                    68,
+                    0.25
+                );
+
+            padding: 11px 13px;
+
+            border-radius: 9px;
+
+            margin-bottom: 18px;
+
+            font-size: 12px;
+
+        }
+
+
+        button {
+
+            width: 100%;
+
+            height: 46px;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #6366f1
+                );
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            margin-top: 6px;
+
+        }
+
+
+        .security-note {
+
+            margin-top: 18px;
+
+            color: #6b7280;
+
+            font-size: 11px;
+
+            text-align: center;
+
+            line-height: 1.5;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="card">
+
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            ◉
+        </div>
+
+        <div>
+
+            <div class="brand-name">
+                FaceAccess
+            </div>
+
+            <div class="brand-subtitle">
+                Smart Security
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <h1>
+        Create Admin Account
+    </h1>
+
+
+    <div class="description">
+        This account will be required to access the dashboard, users, access logs, face images and system settings.
+    </div>
+
+
+
+    {% with messages = get_flashed_messages() %}
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="flash">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+
+    <form
+        method="POST"
+        autocomplete="off"
+    >
+
+
+        <div class="field">
+
+            <label>
+                ADMIN USERNAME
+            </label>
+
+            <input
+                type="text"
+                name="username"
+                minlength="3"
+                required
+                autofocus
+            >
+
+        </div>
+
+
+
+        <div class="field">
+
+            <label>
+                PASSWORD
+            </label>
+
+            <input
+                type="password"
+                name="password"
+                minlength="8"
+                required
+            >
+
+            <div class="hint">
+                Minimum 8 characters.
+            </div>
+
+        </div>
+
+
+
+        <div class="field">
+
+            <label>
+                CONFIRM PASSWORD
+            </label>
+
+            <input
+                type="password"
+                name="confirm_password"
+                minlength="8"
+                required
+            >
+
+        </div>
+
+
+
+        <button type="submit">
+            Create Admin Account
+        </button>
+
+
+    </form>
+
+
+    <div class="security-note">
+        Your password is stored as a secure password hash, not as readable text.
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>

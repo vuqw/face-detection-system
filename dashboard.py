@@ -7,7 +7,8 @@ from flask import (
     flash,
     jsonify,
     send_from_directory,
-    abort
+    abort,
+    session
 )
 
 from database import (
@@ -21,7 +22,26 @@ from database import (
     delete_user
 )
 
-from datetime import datetime, timedelta
+from settings import (
+    load_settings,
+    save_settings,
+    reset_settings
+)
+
+from auth import (
+    admin_exists,
+    load_admin,
+    create_admin,
+    verify_admin,
+    get_secret_key,
+    get_auth_version,
+    change_admin_password
+)
+
+from datetime import (
+    datetime,
+    timedelta
+)
 
 import subprocess
 import sys
@@ -29,9 +49,31 @@ import os
 import shutil
 
 
+# ==========================================
+# Flask
+# ==========================================
+
 app = Flask(__name__)
 
-app.secret_key = "face-access-dev-key"
+app.secret_key = (
+    get_secret_key()
+)
+
+
+app.config.update(
+
+    SESSION_COOKIE_HTTPONLY=True,
+
+    SESSION_COOKIE_SAMESITE="Lax",
+
+    SESSION_COOKIE_SECURE=False,
+
+    PERMANENT_SESSION_LIFETIME=
+        timedelta(
+            hours=8
+        )
+)
+
 
 create_database()
 
@@ -50,6 +92,7 @@ SNAPSHOT_DIR = os.path.join(
     "access_snapshots"
 )
 
+
 os.makedirs(
     SNAPSHOT_DIR,
     exist_ok=True
@@ -60,20 +103,555 @@ recognition_process = None
 
 
 # ==========================================
-# Recognition
+# Authentication
+# ==========================================
+
+@app.before_request
+def protect_application():
+
+    endpoint = request.endpoint
+
+
+    if endpoint == "static":
+
+        return None
+
+
+    # No admin yet
+    if not admin_exists():
+
+        if endpoint == "setup":
+            return None
+
+        return redirect(
+            url_for(
+                "setup"
+            )
+        )
+
+
+    # Setup is disabled after
+    # account creation
+    if endpoint == "setup":
+
+        return redirect(
+            url_for(
+                "login"
+            )
+        )
+
+
+    # Login is public
+    if endpoint == "login":
+
+        return None
+
+
+    # Not logged in
+    if not session.get(
+        "authenticated"
+    ):
+
+        if request.path.startswith(
+            "/api/"
+        ):
+
+            return jsonify({
+                "error":
+                    "Authentication required"
+            }), 401
+
+
+        return redirect(
+            url_for(
+                "login"
+            )
+        )
+
+
+    # ======================================
+    # Session Version Check
+    # ======================================
+
+    current_version = (
+        get_auth_version()
+    )
+
+
+    session_version = (
+        session.get(
+            "auth_version"
+        )
+    )
+
+
+    if (
+        current_version is None
+        or
+        session_version
+        !=
+        current_version
+    ):
+
+        session.clear()
+
+
+        if request.path.startswith(
+            "/api/"
+        ):
+
+            return jsonify({
+                "error":
+                    "Session expired"
+            }), 401
+
+
+        flash(
+            "Your session has expired. Please sign in again."
+        )
+
+
+        return redirect(
+            url_for(
+                "login"
+            )
+        )
+
+
+    return None
+
+
+# ==========================================
+# Setup
+# ==========================================
+
+@app.route(
+    "/setup",
+    methods=[
+        "GET",
+        "POST"
+    ]
+)
+def setup():
+
+    if admin_exists():
+
+        return redirect(
+            url_for(
+                "login"
+            )
+        )
+
+
+    if request.method == "POST":
+
+        username = request.form.get(
+            "username",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            ""
+        )
+
+
+        if password != confirm_password:
+
+            flash(
+                "Passwords do not match."
+            )
+
+            return redirect(
+                url_for(
+                    "setup"
+                )
+            )
+
+
+        try:
+
+            create_admin(
+                username,
+                password
+            )
+
+        except ValueError as error:
+
+            flash(
+                str(error)
+            )
+
+            return redirect(
+                url_for(
+                    "setup"
+                )
+            )
+
+
+        admin = load_admin()
+
+
+        session.clear()
+
+        session.permanent = True
+
+        session[
+            "authenticated"
+        ] = True
+
+        session[
+            "username"
+        ] = admin[
+            "username"
+        ]
+
+        session[
+            "auth_version"
+        ] = admin[
+            "auth_version"
+        ]
+
+
+        flash(
+            "Admin account created successfully."
+        )
+
+
+        return redirect(
+            url_for(
+                "dashboard"
+            )
+        )
+
+
+    return render_template(
+        "setup.html"
+    )
+
+
+# ==========================================
+# Login
+# ==========================================
+
+@app.route(
+    "/login",
+    methods=[
+        "GET",
+        "POST"
+    ]
+)
+def login():
+
+    if not admin_exists():
+
+        return redirect(
+            url_for(
+                "setup"
+            )
+        )
+
+
+    if session.get(
+        "authenticated"
+    ):
+
+        current_version = (
+            get_auth_version()
+        )
+
+        if (
+            session.get(
+                "auth_version"
+            )
+            ==
+            current_version
+        ):
+
+            return redirect(
+                url_for(
+                    "dashboard"
+                )
+            )
+
+
+        session.clear()
+
+
+    if request.method == "POST":
+
+        username = request.form.get(
+            "username",
+            ""
+        )
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+
+        if verify_admin(
+            username,
+            password
+        ):
+
+            admin = load_admin()
+
+
+            session.clear()
+
+            session.permanent = True
+
+            session[
+                "authenticated"
+            ] = True
+
+            session[
+                "username"
+            ] = admin[
+                "username"
+            ]
+
+            session[
+                "auth_version"
+            ] = admin[
+                "auth_version"
+            ]
+
+
+            return redirect(
+                url_for(
+                    "dashboard"
+                )
+            )
+
+
+        flash(
+            "Incorrect username or password."
+        )
+
+
+    return render_template(
+        "login.html"
+    )
+
+
+# ==========================================
+# Logout
+# ==========================================
+
+@app.route(
+    "/logout",
+    methods=["POST"]
+)
+def logout():
+
+    session.clear()
+
+
+    return redirect(
+        url_for(
+            "login"
+        )
+    )
+
+
+# ==========================================
+# Account
+# ==========================================
+
+@app.route(
+    "/account",
+    methods=[
+        "GET",
+        "POST"
+    ]
+)
+def account_page():
+
+    admin = load_admin()
+
+
+    if admin is None:
+
+        abort(404)
+
+
+    if request.method == "POST":
+
+        current_password = (
+            request.form.get(
+                "current_password",
+                ""
+            )
+        )
+
+        new_password = (
+            request.form.get(
+                "new_password",
+                ""
+            )
+        )
+
+        confirm_password = (
+            request.form.get(
+                "confirm_password",
+                ""
+            )
+        )
+
+
+        if new_password != confirm_password:
+
+            flash(
+                "New passwords do not match."
+            )
+
+            return redirect(
+                url_for(
+                    "account_page"
+                )
+            )
+
+
+        try:
+
+            change_admin_password(
+                current_password,
+                new_password
+            )
+
+        except ValueError as error:
+
+            flash(
+                str(error)
+            )
+
+            return redirect(
+                url_for(
+                    "account_page"
+                )
+            )
+
+
+        session.clear()
+
+
+        flash(
+            "Password changed successfully. Please sign in again."
+        )
+
+
+        return redirect(
+            url_for(
+                "login"
+            )
+        )
+
+
+    return render_template(
+        "account.html",
+        admin_username=
+            admin[
+                "username"
+            ]
+    )
+
+
+# ==========================================
+# Recognition Process
 # ==========================================
 
 def recognition_is_running():
 
     global recognition_process
 
+
     if recognition_process is None:
+
         return False
+
 
     return (
         recognition_process.poll()
         is None
     )
+
+
+def start_recognition_process():
+
+    global recognition_process
+
+
+    recognition_script = os.path.join(
+        BASE_DIR,
+        "recognize_face.py"
+    )
+
+
+    recognition_process = (
+        subprocess.Popen(
+            [
+                sys.executable,
+                recognition_script
+            ],
+            cwd=BASE_DIR
+        )
+    )
+
+
+def stop_recognition_process():
+
+    global recognition_process
+
+
+    if not recognition_is_running():
+
+        recognition_process = None
+
+        return
+
+
+    recognition_process.terminate()
+
+
+    try:
+
+        recognition_process.wait(
+            timeout=3
+        )
+
+    except subprocess.TimeoutExpired:
+
+        recognition_process.kill()
+
+        recognition_process.wait()
+
+
+    recognition_process = None
+
+
+def restart_recognition_process():
+
+    was_running = (
+        recognition_is_running()
+    )
+
+
+    if was_running:
+
+        stop_recognition_process()
+
+        start_recognition_process()
+
+
+    return was_running
 
 
 # ==========================================
@@ -84,8 +662,14 @@ def get_user_by_name(name):
 
     for user in get_users():
 
-        if str(user[1]) == str(name):
+        if str(
+            user[1]
+        ) == str(
+            name
+        ):
+
             return user
+
 
     return None
 
@@ -94,9 +678,12 @@ def get_image_url(log):
 
     if (
         len(log) < 6
-        or not log[5]
+        or
+        not log[5]
     ):
+
         return None
+
 
     return url_for(
         "access_snapshot",
@@ -107,15 +694,31 @@ def get_image_url(log):
 def log_to_dict(log):
 
     return {
-        "id": log[0],
-        "name": log[1],
-        "timestamp": log[2],
-        "status": log[3],
-        "similarity": round(
-            float(log[4]),
-            3
-        ),
-        "image_url": get_image_url(log)
+
+        "id":
+            log[0],
+
+        "name":
+            log[1],
+
+        "timestamp":
+            log[2],
+
+        "status":
+            log[3],
+
+        "similarity":
+            round(
+                float(
+                    log[4]
+                ),
+                3
+            ),
+
+        "image_url":
+            get_image_url(
+                log
+            )
     }
 
 
@@ -123,9 +726,11 @@ def get_registered_images(name):
 
     images = []
 
+
     registered_root = os.path.realpath(
         REGISTERED_DIR
     )
+
 
     person_dir = os.path.realpath(
         os.path.join(
@@ -133,6 +738,7 @@ def get_registered_images(name):
             name
         )
     )
+
 
     try:
 
@@ -148,27 +754,39 @@ def get_registered_images(name):
         return []
 
 
-    for number in range(1, 6):
+    for number in range(
+        1,
+        6
+    ):
 
-        filename = f"{number}.jpg"
+        filename = (
+            f"{number}.jpg"
+        )
+
 
         image_path = os.path.join(
             person_dir,
             filename
         )
 
+
         if os.path.isfile(
             image_path
         ):
 
             images.append({
-                "number": number,
-                "url": url_for(
-                    "registered_face_image",
-                    name=name,
-                    filename=filename
-                )
+
+                "number":
+                    number,
+
+                "url":
+                    url_for(
+                        "registered_face_image",
+                        name=name,
+                        filename=filename
+                    )
             })
+
 
     return images
 
@@ -178,11 +796,14 @@ def delete_snapshot_file(
 ):
 
     if not relative_path:
+
         return
+
 
     snapshot_root = os.path.realpath(
         SNAPSHOT_DIR
     )
+
 
     full_path = os.path.realpath(
         os.path.join(
@@ -190,6 +811,7 @@ def delete_snapshot_file(
             relative_path
         )
     )
+
 
     try:
 
@@ -257,7 +879,9 @@ def registered_face_image(
         abort(404)
 
 
-    if get_user_by_name(name) is None:
+    if get_user_by_name(
+        name
+    ) is None:
 
         abort(404)
 
@@ -268,6 +892,7 @@ def registered_face_image(
             name
         )
     )
+
 
     registered_root = os.path.realpath(
         REGISTERED_DIR
@@ -295,7 +920,7 @@ def registered_face_image(
 
 
 # ==========================================
-# Dashboard Chart
+# Dashboard Stats
 # ==========================================
 
 def build_daily_stats(logs):
@@ -314,10 +939,14 @@ def build_daily_stats(logs):
         day = (
             today
             -
-            timedelta(days=i)
+            timedelta(
+                days=i
+            )
         )
 
+
         days.append({
+
             "date":
                 day.strftime(
                     "%Y-%m-%d"
@@ -328,13 +957,19 @@ def build_daily_stats(logs):
                     "%a"
                 ),
 
-            "granted": 0,
-            "denied": 0
+            "granted":
+                0,
+
+            "denied":
+                0
         })
 
 
     indexed_days = {
-        day["date"]: day
+
+        day["date"]:
+            day
+
         for day in days
     }
 
@@ -344,6 +979,7 @@ def build_daily_stats(logs):
         log_date = str(
             log[2]
         )[:10]
+
 
         if log_date not in indexed_days:
             continue
@@ -381,12 +1017,23 @@ def build_security_alerts(
 
 
     denied_today = [
+
         log
+
         for log in logs
+
         if (
-            str(log[3]) == "Denied"
+            str(
+                log[3]
+            )
+            ==
+            "Denied"
+
             and
-            str(log[2]).startswith(
+
+            str(
+                log[2]
+            ).startswith(
                 today
             )
         )
@@ -394,9 +1041,14 @@ def build_security_alerts(
 
 
     unread = [
+
         log
+
         for log in denied_today
-        if int(log[0]) > last_seen_id
+
+        if int(
+            log[0]
+        ) > last_seen_id
     ]
 
 
@@ -411,11 +1063,16 @@ def build_security_alerts(
 
 
     return {
+
         "today_count":
-            len(denied_today),
+            len(
+                denied_today
+            ),
 
         "unread_count":
-            len(unread),
+            len(
+                unread
+            ),
 
         "latest":
             latest,
@@ -435,14 +1092,18 @@ def build_security_alerts(
 def dashboard():
 
     users = get_users()
+
     logs = get_logs()
 
 
     return render_template(
+
         "dashboard.html",
 
         total_users=
-            len(users),
+            len(
+                users
+            ),
 
         active_users=
             sum(
@@ -455,25 +1116,38 @@ def dashboard():
             sum(
                 1
                 for log in logs
-                if log[3] == "Granted"
+                if log[3]
+                ==
+                "Granted"
             ),
 
         denied_count=
             sum(
                 1
                 for log in logs
-                if log[3] == "Denied"
+                if log[3]
+                ==
+                "Denied"
             ),
 
         recognition_running=
-            recognition_is_running()
+            recognition_is_running(),
+
+        admin_username=
+            session.get(
+                "username",
+                "Admin"
+            )
     )
 
 
-@app.route("/api/dashboard")
+@app.route(
+    "/api/dashboard"
+)
 def dashboard_api():
 
     users = get_users()
+
     logs = get_logs()
 
 
@@ -496,7 +1170,9 @@ def dashboard_api():
         "stats": {
 
             "total_users":
-                len(users),
+                len(
+                    users
+                ),
 
             "active_users":
                 sum(
@@ -509,14 +1185,18 @@ def dashboard_api():
                 sum(
                     1
                     for log in logs
-                    if log[3] == "Granted"
+                    if log[3]
+                    ==
+                    "Granted"
                 ),
 
             "denied_count":
                 sum(
                     1
                     for log in logs
-                    if log[3] == "Denied"
+                    if log[3]
+                    ==
+                    "Denied"
                 )
         },
 
@@ -535,22 +1215,157 @@ def dashboard_api():
             ),
 
         "users": [
+
             {
-                "id": user[0],
-                "name": user[1],
-                "created_at": user[2],
-                "active": bool(
-                    user[3]
-                )
+                "id":
+                    user[0],
+
+                "name":
+                    user[1],
+
+                "created_at":
+                    user[2],
+
+                "active":
+                    bool(
+                        user[3]
+                    )
             }
+
             for user in users
         ],
 
         "logs": [
-            log_to_dict(log)
+
+            log_to_dict(
+                log
+            )
+
             for log in logs[:20]
         ]
     })
+
+
+# ==========================================
+# Settings
+# ==========================================
+
+@app.route(
+    "/settings",
+    methods=[
+        "GET",
+        "POST"
+    ]
+)
+def settings_page():
+
+    if request.method == "POST":
+
+        data = {
+
+            "threshold":
+                request.form.get(
+                    "threshold"
+                ),
+
+            "min_margin":
+                request.form.get(
+                    "min_margin"
+                ),
+
+            "stable_time":
+                request.form.get(
+                    "stable_time"
+                ),
+
+            "log_cooldown":
+                request.form.get(
+                    "log_cooldown"
+                ),
+
+            "recognition_interval":
+                request.form.get(
+                    "recognition_interval"
+                ),
+
+            "camera_index":
+                request.form.get(
+                    "camera_index"
+                )
+        }
+
+
+        save_settings(data)
+
+
+        was_running = (
+            restart_recognition_process()
+        )
+
+
+        if was_running:
+
+            flash(
+                "Settings saved and recognition restarted."
+            )
+
+        else:
+
+            flash(
+                "Settings saved successfully."
+            )
+
+
+        return redirect(
+            url_for(
+                "settings_page"
+            )
+        )
+
+
+    settings = load_settings()
+
+
+    return render_template(
+        "settings.html",
+        settings=settings,
+        recognition_running=
+            recognition_is_running()
+    )
+
+
+@app.route(
+    "/settings/reset",
+    methods=["POST"]
+)
+def settings_reset():
+
+    reset_settings()
+
+
+    was_running = (
+        restart_recognition_process()
+    )
+
+
+    if was_running:
+
+        flash(
+            "Settings reset to defaults and recognition restarted."
+        )
+
+    else:
+
+        flash(
+            "Settings reset to defaults."
+        )
+
+
+    return redirect(
+        url_for(
+            "settings_page"
+        )
+    )
 
 
 # ==========================================
@@ -561,7 +1376,9 @@ def dashboard_api():
     "/log/<int:log_id>/delete",
     methods=["POST"]
 )
-def delete_access_log(log_id):
+def delete_access_log(
+    log_id
+):
 
     log = get_log(
         log_id
@@ -586,6 +1403,7 @@ def delete_access_log(log_id):
         if len(log) >= 6
         else None
     )
+
 
     person_name = str(
         log[1]
@@ -650,7 +1468,9 @@ def delete_access_log(log_id):
 # Logs
 # ==========================================
 
-@app.route("/logs")
+@app.route(
+    "/logs"
+)
 def access_logs():
 
     return render_template(
@@ -658,7 +1478,9 @@ def access_logs():
     )
 
 
-@app.route("/api/logs")
+@app.route(
+    "/api/logs"
+)
 def logs_api():
 
     logs = get_logs()
@@ -712,8 +1534,8 @@ def logs_api():
 
         if (
             search
-            and search
-            not in name.lower()
+            and
+            search not in name.lower()
         ):
 
             continue
@@ -721,8 +1543,8 @@ def logs_api():
 
         if (
             status_filter != "all"
-            and status
-            != status_filter
+            and
+            status != status_filter
         ):
 
             continue
@@ -730,8 +1552,10 @@ def logs_api():
 
         if (
             date_filter
-            and timestamp[:10]
-            != date_filter
+            and
+            timestamp[:10]
+            !=
+            date_filter
         ):
 
             continue
@@ -745,7 +1569,9 @@ def logs_api():
     return jsonify({
 
         "count":
-            len(filtered),
+            len(
+                filtered
+            ),
 
         "summary": {
 
@@ -753,26 +1579,36 @@ def logs_api():
                 sum(
                     1
                     for log in filtered
-                    if log[3] == "Granted"
+                    if log[3]
+                    ==
+                    "Granted"
                 ),
 
             "denied":
                 sum(
                     1
                     for log in filtered
-                    if log[3] == "Denied"
+                    if log[3]
+                    ==
+                    "Denied"
                 ),
 
             "disabled":
                 sum(
                     1
                     for log in filtered
-                    if log[3] == "Disabled"
+                    if log[3]
+                    ==
+                    "Disabled"
                 )
         },
 
         "logs": [
-            log_to_dict(log)
+
+            log_to_dict(
+                log
+            )
+
             for log in filtered
         ]
     })
@@ -782,7 +1618,9 @@ def logs_api():
 # Users
 # ==========================================
 
-@app.route("/users")
+@app.route(
+    "/users"
+)
 def users_page():
 
     return render_template(
@@ -790,10 +1628,13 @@ def users_page():
     )
 
 
-@app.route("/api/users")
+@app.route(
+    "/api/users"
+)
 def users_api():
 
     users = get_users()
+
     logs = get_logs()
 
 
@@ -823,7 +1664,10 @@ def users_api():
             continue
 
 
-        if log_name not in latest_logs:
+        if (
+            log_name
+            not in latest_logs
+        ):
 
             latest_logs[
                 log_name
@@ -846,8 +1690,8 @@ def users_api():
 
         if (
             search
-            and search
-            not in name.lower()
+            and
+            search not in name.lower()
         ):
 
             continue
@@ -855,7 +1699,8 @@ def users_api():
 
         if (
             status_filter == "active"
-            and not active
+            and
+            not active
         ):
 
             continue
@@ -863,18 +1708,24 @@ def users_api():
 
         if (
             status_filter == "disabled"
-            and active
+            and
+            active
         ):
 
             continue
 
 
-        images = get_registered_images(
-            name
+        images = (
+            get_registered_images(
+                name
+            )
         )
 
-        latest = latest_logs.get(
-            name
+
+        latest = (
+            latest_logs.get(
+                name
+            )
         )
 
 
@@ -907,8 +1758,11 @@ def users_api():
 
 
     active_count = sum(
+
         1
+
         for user in users
+
         if user[3] == 1
     )
 
@@ -918,13 +1772,17 @@ def users_api():
         "summary": {
 
             "total":
-                len(users),
+                len(
+                    users
+                ),
 
             "active":
                 active_count,
 
             "disabled":
-                len(users)
+                len(
+                    users
+                )
                 -
                 active_count
         },
@@ -938,7 +1796,9 @@ def users_api():
 # User Profile
 # ==========================================
 
-@app.route("/users/<name>")
+@app.route(
+    "/users/<name>"
+)
 def user_profile(name):
 
     if get_user_by_name(
@@ -954,7 +1814,9 @@ def user_profile(name):
     )
 
 
-@app.route("/api/users/<name>")
+@app.route(
+    "/api/users/<name>"
+)
 def user_profile_api(name):
 
     user = get_user_by_name(
@@ -971,14 +1833,25 @@ def user_profile_api(name):
 
 
     logs = [
+
         log
+
         for log in get_logs()
-        if str(log[1]) == str(name)
+
+        if str(
+            log[1]
+        ) == str(
+            name
+        )
     ]
 
 
     similarities = [
-        float(log[4])
+
+        float(
+            log[4]
+        )
+
         for log in logs
     ]
 
@@ -1005,34 +1878,46 @@ def user_profile_api(name):
         "summary": {
 
             "total_attempts":
-                len(logs),
+                len(
+                    logs
+                ),
 
             "granted":
                 sum(
                     1
                     for log in logs
-                    if log[3] == "Granted"
+                    if log[3]
+                    ==
+                    "Granted"
                 ),
 
             "denied":
                 sum(
                     1
                     for log in logs
-                    if log[3] == "Denied"
+                    if log[3]
+                    ==
+                    "Denied"
                 ),
 
             "disabled":
                 sum(
                     1
                     for log in logs
-                    if log[3] == "Disabled"
+                    if log[3]
+                    ==
+                    "Disabled"
                 ),
 
             "average_similarity":
                 round(
-                    sum(similarities)
+                    sum(
+                        similarities
+                    )
                     /
-                    len(similarities),
+                    len(
+                        similarities
+                    ),
                     3
                 )
                 if similarities
@@ -1040,7 +1925,9 @@ def user_profile_api(name):
 
             "highest_similarity":
                 round(
-                    max(similarities),
+                    max(
+                        similarities
+                    ),
                     3
                 )
                 if similarities
@@ -1060,7 +1947,11 @@ def user_profile_api(name):
             ),
 
         "logs": [
-            log_to_dict(log)
+
+            log_to_dict(
+                log
+            )
+
             for log in logs[:50]
         ]
     })
@@ -1076,21 +1967,9 @@ def user_profile_api(name):
 )
 def start_recognition():
 
-    global recognition_process
-
-
     if not recognition_is_running():
 
-        recognition_process = subprocess.Popen(
-            [
-                sys.executable,
-                os.path.join(
-                    BASE_DIR,
-                    "recognize_face.py"
-                )
-            ],
-            cwd=BASE_DIR
-        )
+        start_recognition_process()
 
 
     return redirect(
@@ -1106,26 +1985,7 @@ def start_recognition():
 )
 def stop_recognition():
 
-    global recognition_process
-
-
-    if recognition_is_running():
-
-        recognition_process.terminate()
-
-
-        try:
-
-            recognition_process.wait(
-                timeout=3
-            )
-
-        except subprocess.TimeoutExpired:
-
-            recognition_process.kill()
-
-
-    recognition_process = None
+    stop_recognition_process()
 
 
     return redirect(
@@ -1136,7 +1996,7 @@ def stop_recognition():
 
 
 # ==========================================
-# Registration
+# Register
 # ==========================================
 
 @app.route(
@@ -1169,7 +2029,9 @@ def register():
             )
 
 
-        invalid_chars = '<>:"/\\|?*'
+        invalid_chars = (
+            '<>:"/\\|?*'
+        )
 
 
         if any(
@@ -1189,6 +2051,7 @@ def register():
 
 
         subprocess.Popen(
+
             [
                 sys.executable,
 
@@ -1199,6 +2062,7 @@ def register():
 
                 name
             ],
+
             cwd=BASE_DIR
         )
 
@@ -1229,9 +2093,11 @@ def enable(name):
         name
     )
 
+
     return redirect(
         request.referrer
-        or url_for(
+        or
+        url_for(
             "dashboard"
         )
     )
@@ -1247,9 +2113,11 @@ def disable(name):
         name
     )
 
+
     return redirect(
         request.referrer
-        or url_for(
+        or
+        url_for(
             "dashboard"
         )
     )
@@ -1297,7 +2165,8 @@ def delete(name):
 
     return redirect(
         request.referrer
-        or url_for(
+        or
+        url_for(
             "dashboard"
         )
     )
