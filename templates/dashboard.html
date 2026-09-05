@@ -1,0 +1,3122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Face Access System</title>
+
+
+    <script>
+
+        const savedTheme =
+            localStorage.getItem(
+                "faceaccess-theme"
+            );
+
+        if (savedTheme) {
+
+            document.documentElement
+                .setAttribute(
+                    "data-theme",
+                    savedTheme
+                );
+
+        }
+
+    </script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        :root {
+
+            --bg: #f4f6fa;
+
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+
+            --text: #111827;
+            --muted: #6b7280;
+
+            --border: #e5e7eb;
+
+            --sidebar: #111827;
+            --sidebar-hover: #1f2937;
+
+            --green: #16a34a;
+            --green-bg: #dcfce7;
+
+            --red: #dc2626;
+            --red-bg: #fee2e2;
+
+            --yellow: #ca8a04;
+            --yellow-bg: #fef9c3;
+
+            --blue: #2563eb;
+            --blue-bg: #dbeafe;
+
+            --row-hover: #fafafa;
+
+            --system-start: #111827;
+            --system-end: #1f2937;
+
+        }
+
+
+        html[data-theme="dark"] {
+
+            --bg: #0b0f17;
+
+            --surface: #111827;
+            --surface-soft: #18202e;
+
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+
+            --border: #273244;
+
+            --sidebar: #080c13;
+            --sidebar-hover: #1a2230;
+
+            --green: #22c55e;
+            --green-bg: rgba(34,197,94,0.14);
+
+            --red: #ef4444;
+            --red-bg: rgba(239,68,68,0.14);
+
+            --yellow-bg: rgba(234,179,8,0.14);
+
+            --blue-bg: rgba(59,130,246,0.14);
+
+            --row-hover: #18202e;
+
+            --system-start: #18202e;
+            --system-end: #111827;
+
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background:
+                var(--bg);
+
+            color:
+                var(--text);
+
+        }
+
+
+        .app {
+
+            display: flex;
+
+            min-height: 100vh;
+
+        }
+
+
+        /* Sidebar */
+
+        .sidebar {
+
+            width: 250px;
+
+            background:
+                var(--sidebar);
+
+            color: white;
+
+            padding: 28px 20px;
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+            bottom: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            z-index: 10;
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 40px;
+
+        }
+
+
+        .brand-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #8b5cf6
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+        .brand-title {
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+        }
+
+
+        .brand-subtitle {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+        }
+
+
+        .nav-label {
+
+            color: #6b7280;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin:
+                15px
+                10px
+                8px;
+
+        }
+
+
+        .nav-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 12px 14px;
+
+            border-radius: 10px;
+
+            color: #d1d5db;
+
+            text-decoration: none;
+
+            margin-bottom: 5px;
+
+            font-size: 14px;
+
+        }
+
+
+        .nav-item:hover,
+        .nav-item.active {
+
+            background:
+                var(--sidebar-hover);
+
+            color: white;
+
+        }
+
+
+        .sidebar-bottom {
+
+            margin-top: auto;
+
+        }
+
+
+        .theme-button {
+
+            width: 100%;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            padding: 12px 14px;
+
+            background:
+                var(--sidebar-hover);
+
+            color: white;
+
+            cursor: pointer;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .sidebar-status {
+
+            background:
+                var(--sidebar-hover);
+
+            border-radius: 12px;
+
+            padding: 14px;
+
+        }
+
+
+        .sidebar-status-title {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+        }
+
+
+        .sidebar-status-value {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            margin-top: 8px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+        }
+
+
+        /* Main */
+
+        .main {
+
+            flex: 1;
+
+            margin-left: 250px;
+
+            padding: 35px;
+
+        }
+
+
+        .topbar {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+        }
+
+
+        .subtitle {
+
+            margin-top: 6px;
+
+            color:
+                var(--muted);
+
+            font-size: 14px;
+
+        }
+
+
+        .register-btn {
+
+            text-decoration: none;
+
+            background: #111827;
+
+            color: white;
+
+            padding: 11px 18px;
+
+            border-radius: 10px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+        }
+
+
+        html[data-theme="dark"]
+        .register-btn {
+
+            background: #f3f4f6;
+
+            color: #111827;
+
+        }
+
+
+        /* Recognition */
+
+        .system-card {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--system-start),
+                    var(--system-end)
+                );
+
+            color: white;
+
+            border-radius: 16px;
+
+            padding: 22px 24px;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-bottom: 22px;
+
+        }
+
+
+        .system-info {
+
+            display: flex;
+
+            gap: 14px;
+
+            align-items: center;
+
+        }
+
+
+        .system-icon {
+
+            width: 48px;
+            height: 48px;
+
+            border-radius: 13px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                rgba(255,255,255,0.08);
+
+        }
+
+
+        .system-title {
+
+            font-weight: 650;
+
+        }
+
+
+        .system-state {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            color: #9ca3af;
+
+            margin-top: 5px;
+
+            font-size: 13px;
+
+        }
+
+
+        .status-dot {
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+        }
+
+
+        .status-running {
+
+            background: #22c55e;
+
+        }
+
+
+        .status-stopped {
+
+            background: #ef4444;
+
+        }
+
+
+        .start-btn,
+        .stop-btn {
+
+            border: 0;
+
+            border-radius: 9px;
+
+            padding: 10px 17px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+        }
+
+
+        .start-btn {
+
+            background: #22c55e;
+
+            color: #052e16;
+
+        }
+
+
+        .stop-btn {
+
+            background: #ef4444;
+
+            color: white;
+
+        }
+
+
+        /* Security Alert */
+
+        .security-alert {
+
+            background:
+                var(--red-bg);
+
+            border:
+                1px solid
+                rgba(239,68,68,0.25);
+
+            border-radius: 14px;
+
+            padding: 16px 18px;
+
+            margin-bottom: 22px;
+
+            display: none;
+
+            align-items: center;
+
+            justify-content:
+                space-between;
+
+            gap: 20px;
+
+        }
+
+
+        .security-alert-left {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+        }
+
+
+        .security-alert-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            background:
+                var(--red);
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 20px;
+
+            font-weight: 800;
+
+        }
+
+
+        .security-alert-title {
+
+            color:
+                var(--red);
+
+            font-weight: 700;
+
+        }
+
+
+        .security-alert-badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            min-width: 22px;
+            height: 22px;
+
+            border-radius: 20px;
+
+            padding: 0 7px;
+
+            margin-left: 6px;
+
+            background:
+                var(--red);
+
+            color: white;
+
+            font-size: 11px;
+
+        }
+
+
+        .security-alert-text {
+
+            margin-top: 4px;
+
+            color:
+                var(--muted);
+
+            font-size: 13px;
+
+        }
+
+
+        .security-alert-right {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+        }
+
+
+        .security-alert-image {
+
+            width: 52px;
+            height: 52px;
+
+            border-radius: 9px;
+
+            object-fit: cover;
+
+            border:
+                1px solid
+                var(--border);
+
+            cursor: pointer;
+
+        }
+
+
+        .security-review {
+
+            text-decoration: none;
+
+            background:
+                var(--red);
+
+            color: white;
+
+            padding: 8px 12px;
+
+            border-radius: 8px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+        }
+
+
+        .security-reviewed {
+
+            border:
+                1px solid
+                var(--border);
+
+            background:
+                var(--surface);
+
+            color:
+                var(--text);
+
+            padding: 8px 12px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+            font-size: 12px;
+
+        }
+
+
+        /* Stats */
+
+        .stats-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4,1fr);
+
+            gap: 16px;
+
+            margin-bottom: 22px;
+
+        }
+
+
+        .stat-card {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            padding: 19px;
+
+        }
+
+
+        .stat-label {
+
+            color:
+                var(--muted);
+
+            font-size: 13px;
+
+        }
+
+
+        .stat-value {
+
+            font-size: 30px;
+
+            font-weight: 700;
+
+            margin-top: 14px;
+
+        }
+
+
+        /* Sections */
+
+        .section {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            margin-bottom: 22px;
+
+            overflow: hidden;
+
+        }
+
+
+        .section-header {
+
+            padding: 18px 20px;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        .section-title {
+
+            font-weight: 650;
+
+        }
+
+
+        .section-description {
+
+            margin-top: 4px;
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+        }
+
+
+        /* Chart */
+
+        .chart-area {
+
+            padding:
+                28px
+                24px
+                20px;
+
+        }
+
+
+        .chart {
+
+            height: 270px;
+
+            display: flex;
+
+            align-items: flex-end;
+
+            justify-content:
+                space-around;
+
+            gap: 18px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        .chart-day {
+
+            flex: 1;
+
+            height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content:
+                flex-end;
+
+            align-items: center;
+
+        }
+
+
+        .bars {
+
+            flex: 1;
+
+            display: flex;
+
+            align-items: flex-end;
+
+            justify-content: center;
+
+            gap: 7px;
+
+        }
+
+
+        .bar-wrapper {
+
+            height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content:
+                flex-end;
+
+            align-items: center;
+
+        }
+
+
+        .bar-number {
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .bar {
+
+            width: 19px;
+
+            border-radius:
+                5px
+                5px
+                0
+                0;
+
+        }
+
+
+        .bar-granted {
+            background: #22c55e;
+        }
+
+
+        .bar-denied {
+            background: #ef4444;
+        }
+
+
+        .chart-label {
+
+            padding: 10px 0;
+
+            font-size: 11px;
+
+            color:
+                var(--muted);
+
+        }
+
+
+        /* Tables */
+
+        table {
+
+            width: 100%;
+
+            border-collapse:
+                collapse;
+
+        }
+
+
+        th {
+
+            text-align: left;
+
+            padding: 12px 18px;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+        }
+
+
+        td {
+
+            padding: 15px 18px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+            font-size: 14px;
+
+        }
+
+
+        tbody tr:hover {
+
+            background:
+                var(--row-hover);
+
+        }
+
+
+        .time-main {
+            font-weight: 600;
+        }
+
+
+        .time-secondary {
+
+            display: block;
+
+            margin-top: 3px;
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+        }
+
+
+        .status-pill {
+
+            display: inline-flex;
+
+            border-radius: 20px;
+
+            padding: 5px 10px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+        }
+
+
+        .active,
+        .granted {
+
+            background:
+                var(--green-bg);
+
+            color:
+                var(--green);
+
+        }
+
+
+        .disabled,
+        .denied {
+
+            background:
+                var(--red-bg);
+
+            color:
+                var(--red);
+
+        }
+
+
+        .face-thumb {
+
+            width: 52px;
+            height: 52px;
+
+            border-radius: 10px;
+
+            object-fit: cover;
+
+            border:
+                1px solid
+                var(--border);
+
+            cursor: pointer;
+
+        }
+
+
+        .actions {
+
+            display: flex;
+
+            gap: 7px;
+
+        }
+
+
+        .actions form {
+            margin: 0;
+        }
+
+
+        .btn {
+
+            border: 0;
+
+            border-radius: 8px;
+
+            padding: 7px 11px;
+
+            cursor: pointer;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+        }
+
+
+        .disable-btn {
+
+            background:
+                var(--yellow-bg);
+
+            color:
+                var(--yellow);
+
+        }
+
+
+        .enable-btn {
+
+            background:
+                var(--green-bg);
+
+            color:
+                var(--green);
+
+        }
+
+
+        .delete-btn {
+
+            background:
+                var(--red-bg);
+
+            color:
+                var(--red);
+
+        }
+
+
+        .view-all {
+
+            text-decoration: none;
+
+            color:
+                var(--blue);
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+        }
+
+
+        .empty {
+
+            padding: 40px;
+
+            text-align: center;
+
+            color:
+                var(--muted);
+
+        }
+
+
+        /* Modal */
+
+        .image-modal {
+
+            display: none;
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 999;
+
+            background:
+                rgba(0,0,0,0.8);
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+        }
+
+
+        .image-modal.show {
+            display: flex;
+        }
+
+
+        .modal-card {
+
+            background:
+                var(--surface);
+
+            width: 100%;
+
+            max-width: 520px;
+
+            border-radius: 16px;
+
+            padding: 16px;
+
+        }
+
+
+        .modal-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content:
+                space-between;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .modal-close {
+
+            width: 34px;
+            height: 34px;
+
+            border: 0;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--text);
+
+        }
+
+
+        .modal-image {
+
+            width: 100%;
+
+            max-height: 70vh;
+
+            object-fit: contain;
+
+            background: black;
+
+            border-radius: 12px;
+
+        }
+
+
+        @media(max-width:1000px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+
+                grid-template-columns:
+                    repeat(2,1fr);
+
+            }
+
+        }
+
+
+        @media(max-width:650px) {
+
+            .main {
+                padding: 20px;
+            }
+
+
+            .topbar,
+            .system-card,
+            .security-alert {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+
+            }
+
+
+            .stats-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .section {
+                overflow-x: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ◉
+            </div>
+
+            <div>
+
+                <div class="brand-title">
+                    FaceAccess
+                </div>
+
+                <div class="brand-subtitle">
+                    Smart Security
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="nav-label">
+            Main
+        </div>
+
+
+        <a
+            href="/"
+            class="nav-item active"
+        >
+            ▦ Dashboard
+        </a>
+
+
+        <a
+            href="/users"
+            class="nav-item"
+        >
+            👤 Users
+        </a>
+
+
+        <a
+            href="/register"
+            class="nav-item"
+        >
+            ＋ Register Person
+        </a>
+
+
+        <div class="nav-label">
+            System
+        </div>
+
+
+        <a
+            href="#recognition-section"
+            class="nav-item"
+        >
+            ◎ Face Recognition
+        </a>
+
+
+        <a
+            href="/logs"
+            class="nav-item"
+        >
+            ◫ Access Logs
+        </a>
+
+
+        <div class="sidebar-bottom">
+
+
+            <button
+                id="theme-toggle"
+                class="theme-button"
+            >
+
+                <span id="theme-text">
+                    Dark Mode
+                </span>
+
+                <span id="theme-icon">
+                    ☾
+                </span>
+
+            </button>
+
+
+            <div class="sidebar-status">
+
+                <div class="sidebar-status-title">
+                    System Status
+                </div>
+
+                <div class="sidebar-status-value">
+
+                    <span
+                        id="sidebar-status-dot"
+                        class="
+                            status-dot
+                            {% if recognition_running %}
+                                status-running
+                            {% else %}
+                                status-stopped
+                            {% endif %}
+                        "
+                    ></span>
+
+                    <span id="sidebar-status-text">
+
+                        {% if recognition_running %}
+
+                            Recognition Active
+
+                        {% else %}
+
+                            Recognition Offline
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <main class="main">
+
+
+        <div class="topbar">
+
+            <div>
+
+                <h1>
+                    Dashboard
+                </h1>
+
+                <div class="subtitle">
+                    Manage access, users and facial recognition.
+                </div>
+
+            </div>
+
+
+            <a
+                href="/register"
+                class="register-btn"
+            >
+                ＋ Register New Person
+            </a>
+
+        </div>
+
+
+
+        <section
+            id="recognition-section"
+            class="system-card"
+        >
+
+
+            <div class="system-info">
+
+                <div class="system-icon">
+                    ◉
+                </div>
+
+                <div>
+
+                    <div class="system-title">
+                        Face Recognition Engine
+                    </div>
+
+                    <div class="system-state">
+
+                        <span
+                            id="recognition-dot"
+                            class="
+                                status-dot
+                                {% if recognition_running %}
+                                    status-running
+                                {% else %}
+                                    status-stopped
+                                {% endif %}
+                            "
+                        ></span>
+
+                        <span id="recognition-status">
+
+                            {% if recognition_running %}
+
+                                System is running
+
+                            {% else %}
+
+                                System is stopped
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div id="recognition-controls">
+
+                {% if recognition_running %}
+
+                    <form
+                        method="POST"
+                        action="/recognition/stop"
+                    >
+
+                        <button
+                            class="stop-btn"
+                        >
+                            Stop Recognition
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <form
+                        method="POST"
+                        action="/recognition/start"
+                    >
+
+                        <button
+                            class="start-btn"
+                        >
+                            Start Recognition
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+            </div>
+
+
+        </section>
+
+
+
+        <section
+            class="security-alert"
+            id="security-alert"
+        >
+
+
+            <div class="security-alert-left">
+
+                <div class="security-alert-icon">
+                    !
+                </div>
+
+                <div>
+
+                    <div class="security-alert-title">
+
+                        Security Alert
+
+                        <span
+                            class="security-alert-badge"
+                            id="security-alert-count"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="security-alert-text"
+                        id="security-alert-text"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="security-alert-right">
+
+                <img
+                    id="security-alert-image"
+                    class="security-alert-image"
+                    style="display:none;"
+                    alt="Denied face"
+                >
+
+                <a
+                    href="/logs?status=Denied"
+                    class="security-review"
+                >
+                    Review
+                </a>
+
+                <button
+                    id="mark-alerts-reviewed"
+                    class="security-reviewed"
+                    type="button"
+                >
+                    Mark Reviewed
+                </button>
+
+            </div>
+
+
+        </section>
+
+
+
+        <div class="stats-grid">
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Users
+                </div>
+
+                <div
+                    id="total-users"
+                    class="stat-value"
+                >
+                    {{ total_users }}
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Active Users
+                </div>
+
+                <div
+                    id="active-users"
+                    class="stat-value"
+                >
+                    {{ active_users }}
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Access Granted
+                </div>
+
+                <div
+                    id="granted-count"
+                    class="stat-value"
+                >
+                    {{ granted_count }}
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Access Denied
+                </div>
+
+                <div
+                    id="denied-count"
+                    class="stat-value"
+                >
+                    {{ denied_count }}
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <div class="section-title">
+                        Access Activity
+                    </div>
+
+                    <div class="section-description">
+                        Granted and denied attempts during the last 7 days.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-area">
+
+                <div
+                    id="activity-chart"
+                    class="chart"
+                ></div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <div class="section-title">
+                        Registered Users
+                    </div>
+
+                    <div class="section-description">
+                        Manage people who can access the system.
+                    </div>
+
+                </div>
+
+
+                <a
+                    href="/users"
+                    class="view-all"
+                >
+                    View All →
+                </a>
+
+            </div>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Name</th>
+
+                        <th>Registered</th>
+
+                        <th>Status</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="users-table">
+                </tbody>
+
+            </table>
+
+
+        </section>
+
+
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <div>
+
+                    <div class="section-title">
+                        Recent Access Activity
+                    </div>
+
+                    <div class="section-description">
+                        Latest access attempts with captured faces.
+                    </div>
+
+                </div>
+
+
+                <a
+                    href="/logs"
+                    class="view-all"
+                >
+                    View All →
+                </a>
+
+            </div>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Person</th>
+
+                        <th>Date & Time</th>
+
+                        <th>Status</th>
+
+                        <th>Similarity</th>
+
+                        <th>Face</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="logs-table">
+                </tbody>
+
+            </table>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<div
+    id="image-modal"
+    class="image-modal"
+>
+
+    <div class="modal-card">
+
+        <div class="modal-header">
+
+            <strong id="modal-title">
+                Captured Face
+            </strong>
+
+            <button
+                id="modal-close"
+                class="modal-close"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <img
+            id="modal-image"
+            class="modal-image"
+            alt="Captured face"
+        >
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+/* Security */
+
+function escapeHtml(value) {
+
+    return String(value)
+
+        .replaceAll("&", "&amp;")
+
+        .replaceAll("<", "&lt;")
+
+        .replaceAll(">", "&gt;")
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+
+/* Theme */
+
+function updateThemeButton() {
+
+    const dark =
+        document.documentElement
+            .getAttribute(
+                "data-theme"
+            )
+        ===
+        "dark";
+
+
+    document.getElementById(
+        "theme-text"
+    ).textContent =
+        dark
+            ? "Light Mode"
+            : "Dark Mode";
+
+
+    document.getElementById(
+        "theme-icon"
+    ).textContent =
+        dark
+            ? "☀"
+            : "☾";
+
+}
+
+
+document.getElementById(
+    "theme-toggle"
+).addEventListener(
+    "click",
+    () => {
+
+        const current =
+            document.documentElement
+                .getAttribute(
+                    "data-theme"
+                );
+
+
+        const next =
+            current === "dark"
+                ? "light"
+                : "dark";
+
+
+        document.documentElement
+            .setAttribute(
+                "data-theme",
+                next
+            );
+
+
+        localStorage.setItem(
+            "faceaccess-theme",
+            next
+        );
+
+
+        updateThemeButton();
+
+    }
+);
+
+
+updateThemeButton();
+
+
+
+/* Time */
+
+function parseTimestamp(timestamp) {
+
+    const [
+        datePart,
+        timePart
+    ] = timestamp.split(" ");
+
+
+    const [
+        year,
+        month,
+        day
+    ] = datePart
+        .split("-")
+        .map(Number);
+
+
+    const [
+        hour,
+        minute,
+        second
+    ] = timePart
+        .split(":")
+        .map(Number);
+
+
+    return new Date(
+        year,
+        month - 1,
+        day,
+        hour,
+        minute,
+        second
+    );
+
+}
+
+
+function formatTimestamp(timestamp) {
+
+    const date =
+        parseTimestamp(
+            timestamp
+        );
+
+
+    const now =
+        new Date();
+
+
+    const isToday =
+        date.getFullYear()
+            === now.getFullYear()
+        &&
+        date.getMonth()
+            === now.getMonth()
+        &&
+        date.getDate()
+            === now.getDate();
+
+
+    return {
+
+        main:
+            isToday
+                ? "Today"
+                : date.toLocaleDateString(
+                    "en-US",
+                    {
+                        month: "short",
+                        day: "numeric"
+                    }
+                ),
+
+        secondary:
+            date.toLocaleTimeString(
+                "en-US",
+                {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true
+                }
+            )
+
+    };
+
+}
+
+
+function formatRegisteredDate(timestamp) {
+
+    const date =
+        parseTimestamp(
+            timestamp
+        );
+
+
+    return {
+
+        main:
+            date.toLocaleDateString(
+                "en-US",
+                {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            ),
+
+        secondary:
+            date.toLocaleTimeString(
+                "en-US",
+                {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true
+                }
+            )
+
+    };
+
+}
+
+
+
+/* Modal */
+
+const modal =
+    document.getElementById(
+        "image-modal"
+    );
+
+
+function openImageModal(
+    url,
+    title
+) {
+
+    document.getElementById(
+        "modal-image"
+    ).src = url;
+
+
+    document.getElementById(
+        "modal-title"
+    ).textContent = title;
+
+
+    modal.classList.add(
+        "show"
+    );
+
+}
+
+
+function closeImageModal() {
+
+    modal.classList.remove(
+        "show"
+    );
+
+}
+
+
+document.getElementById(
+    "modal-close"
+).addEventListener(
+    "click",
+    closeImageModal
+);
+
+
+modal.addEventListener(
+    "click",
+    event => {
+
+        if (event.target === modal) {
+
+            closeImageModal();
+
+        }
+
+    }
+);
+
+
+
+/* Chart */
+
+function updateChart(
+    dailyStats
+) {
+
+    const chart =
+        document.getElementById(
+            "activity-chart"
+        );
+
+
+    chart.innerHTML = "";
+
+
+    let maxValue = 1;
+
+
+    dailyStats.forEach(
+        day => {
+
+            maxValue = Math.max(
+                maxValue,
+                day.granted,
+                day.denied
+            );
+
+        }
+    );
+
+
+    dailyStats.forEach(
+        day => {
+
+
+            const grantedHeight =
+                day.granted === 0
+                    ? 0
+                    : Math.max(
+                        (
+                            day.granted
+                            /
+                            maxValue
+                        )
+                        * 170,
+                        8
+                    );
+
+
+            const deniedHeight =
+                day.denied === 0
+                    ? 0
+                    : Math.max(
+                        (
+                            day.denied
+                            /
+                            maxValue
+                        )
+                        * 170,
+                        8
+                    );
+
+
+            const group =
+                document.createElement(
+                    "div"
+                );
+
+
+            group.className =
+                "chart-day";
+
+
+            group.innerHTML = `
+
+                <div class="bars">
+
+                    <div class="bar-wrapper">
+
+                        <div class="bar-number">
+                            ${day.granted}
+                        </div>
+
+                        <div
+                            class="
+                                bar
+                                bar-granted
+                            "
+                            style="
+                                height:
+                                ${grantedHeight}px
+                            "
+                        ></div>
+
+                    </div>
+
+
+                    <div class="bar-wrapper">
+
+                        <div class="bar-number">
+                            ${day.denied}
+                        </div>
+
+                        <div
+                            class="
+                                bar
+                                bar-denied
+                            "
+                            style="
+                                height:
+                                ${deniedHeight}px
+                            "
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-label">
+                    ${day.label}
+                </div>
+
+            `;
+
+
+            chart.appendChild(
+                group
+            );
+
+
+        }
+    );
+
+}
+
+
+
+/* Dashboard */
+
+async function updateDashboard() {
+
+    try {
+
+
+        const lastSeenDeniedId =
+            Number(
+                localStorage.getItem(
+                    "faceaccess-last-seen-denied"
+                )
+                || 0
+            );
+
+
+        const response =
+            await fetch(
+                `/api/dashboard?last_seen_denied_id=${lastSeenDeniedId}`,
+                {
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+
+        document.getElementById(
+            "total-users"
+        ).textContent =
+            data.stats.total_users;
+
+
+        document.getElementById(
+            "active-users"
+        ).textContent =
+            data.stats.active_users;
+
+
+        document.getElementById(
+            "granted-count"
+        ).textContent =
+            data.stats.granted_count;
+
+
+        document.getElementById(
+            "denied-count"
+        ).textContent =
+            data.stats.denied_count;
+
+
+
+        updateChart(
+            data.daily_stats
+        );
+
+
+
+        /* Security Alert */
+
+        const alerts =
+            data.security_alerts;
+
+
+        const alertBox =
+            document.getElementById(
+                "security-alert"
+            );
+
+
+        if (
+            alerts.unread_count > 0
+            &&
+            alerts.latest
+        ) {
+
+
+            alertBox.style.display =
+                "flex";
+
+
+            document.getElementById(
+                "security-alert-count"
+            ).textContent =
+                alerts.unread_count;
+
+
+            const alertTime =
+                formatTimestamp(
+                    alerts.latest
+                        .timestamp
+                );
+
+
+            document.getElementById(
+                "security-alert-text"
+            ).textContent =
+                `${alerts.unread_count} new denied attempt(s). Latest: ${alertTime.main} • ${alertTime.secondary}`;
+
+
+            const alertImage =
+                document.getElementById(
+                    "security-alert-image"
+                );
+
+
+            if (
+                alerts.latest.image_url
+            ) {
+
+                alertImage.src =
+                    alerts.latest.image_url;
+
+
+                alertImage.style.display =
+                    "block";
+
+
+                alertImage.onclick =
+                    () => {
+
+                        openImageModal(
+                            alerts.latest
+                                .image_url,
+                            "Denied Access Attempt"
+                        );
+
+                    };
+
+            }
+
+            else {
+
+                alertImage.style.display =
+                    "none";
+
+            }
+
+        }
+
+        else {
+
+            alertBox.style.display =
+                "none";
+
+        }
+
+
+
+        /* Recognition */
+
+        const running =
+            data.recognition_running;
+
+
+        document.getElementById(
+            "recognition-dot"
+        ).className =
+            running
+                ? "status-dot status-running"
+                : "status-dot status-stopped";
+
+
+        document.getElementById(
+            "sidebar-status-dot"
+        ).className =
+            running
+                ? "status-dot status-running"
+                : "status-dot status-stopped";
+
+
+        document.getElementById(
+            "recognition-status"
+        ).textContent =
+            running
+                ? "System is running"
+                : "System is stopped";
+
+
+        document.getElementById(
+            "sidebar-status-text"
+        ).textContent =
+            running
+                ? "Recognition Active"
+                : "Recognition Offline";
+
+
+        document.getElementById(
+            "recognition-controls"
+        ).innerHTML =
+            running
+
+            ? `
+
+                <form
+                    method="POST"
+                    action="/recognition/stop"
+                >
+
+                    <button class="stop-btn">
+                        Stop Recognition
+                    </button>
+
+                </form>
+
+            `
+
+            : `
+
+                <form
+                    method="POST"
+                    action="/recognition/start"
+                >
+
+                    <button class="start-btn">
+                        Start Recognition
+                    </button>
+
+                </form>
+
+            `;
+
+
+
+        /* Users */
+
+        const usersTable =
+            document.getElementById(
+                "users-table"
+            );
+
+
+        usersTable.innerHTML = "";
+
+
+        data.users.forEach(
+            user => {
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const date =
+                    formatRegisteredDate(
+                        user.created_at
+                    );
+
+
+                const encodedName =
+                    encodeURIComponent(
+                        user.name
+                    );
+
+
+                row.innerHTML = `
+
+                    <td>
+                        #${user.id}
+                    </td>
+
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(
+                                user.name
+                            )}
+                        </strong>
+                    </td>
+
+
+                    <td>
+
+                        <span class="time-main">
+                            ${date.main}
+                        </span>
+
+                        <span class="time-secondary">
+                            ${date.secondary}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        ${
+                            user.active
+
+                            ? `
+                                <span
+                                    class="
+                                        status-pill
+                                        active
+                                    "
+                                >
+                                    ● Active
+                                </span>
+                            `
+
+                            : `
+                                <span
+                                    class="
+                                        status-pill
+                                        disabled
+                                    "
+                                >
+                                    ● Disabled
+                                </span>
+                            `
+                        }
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="actions">
+
+                            ${
+                                user.active
+
+                                ? `
+                                    <form
+                                        method="POST"
+                                        action="/user/${encodedName}/disable"
+                                    >
+
+                                        <button
+                                            class="
+                                                btn
+                                                disable-btn
+                                            "
+                                        >
+                                            Disable
+                                        </button>
+
+                                    </form>
+                                `
+
+                                : `
+                                    <form
+                                        method="POST"
+                                        action="/user/${encodedName}/enable"
+                                    >
+
+                                        <button
+                                            class="
+                                                btn
+                                                enable-btn
+                                            "
+                                        >
+                                            Enable
+                                        </button>
+
+                                    </form>
+                                `
+                            }
+
+
+                            <form
+                                method="POST"
+                                action="/user/${encodedName}/delete"
+                                onsubmit="
+                                    return confirm(
+                                        'Delete this user permanently?'
+                                    );
+                                "
+                            >
+
+                                <button
+                                    class="
+                                        btn
+                                        delete-btn
+                                    "
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                `;
+
+
+                usersTable.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+
+        /* Logs */
+
+        const logsTable =
+            document.getElementById(
+                "logs-table"
+            );
+
+
+        logsTable.innerHTML = "";
+
+
+        if (
+            data.logs.length === 0
+        ) {
+
+            logsTable.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="empty"
+                    >
+                        No access activity yet.
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        data.logs.forEach(
+            log => {
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const time =
+                    formatTimestamp(
+                        log.timestamp
+                    );
+
+
+                let statusHtml;
+
+
+                if (
+                    log.status ===
+                    "Granted"
+                ) {
+
+                    statusHtml = `
+
+                        <span
+                            class="
+                                status-pill
+                                granted
+                            "
+                        >
+                            ✓ Granted
+                        </span>
+
+                    `;
+
+                }
+
+                else {
+
+                    statusHtml = `
+
+                        <span
+                            class="
+                                status-pill
+                                denied
+                            "
+                        >
+                            ${
+                                log.status
+                                === "Disabled"
+                                    ? "Disabled"
+                                    : "× Denied"
+                            }
+                        </span>
+
+                    `;
+
+                }
+
+
+                let imageHtml;
+
+
+                if (
+                    log.image_url
+                ) {
+
+                    imageHtml = `
+
+                        <img
+                            class="face-thumb"
+                            src="${escapeHtml(
+                                log.image_url
+                            )}"
+                            alt="Captured face"
+                            data-image="${escapeHtml(
+                                log.image_url
+                            )}"
+                        >
+
+                    `;
+
+                }
+
+                else {
+
+                    imageHtml = `
+                        <span style="color:var(--muted);font-size:12px;">
+                            No image
+                        </span>
+                    `;
+
+                }
+
+
+                row.innerHTML = `
+
+                    <td>
+                        #${log.id}
+                    </td>
+
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(
+                                log.name
+                            )}
+                        </strong>
+                    </td>
+
+
+                    <td>
+
+                        <span class="time-main">
+                            ${time.main}
+                        </span>
+
+                        <span class="time-secondary">
+                            ${time.secondary}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+                        ${statusHtml}
+                    </td>
+
+
+                    <td>
+                        ${Number(
+                            log.similarity
+                        ).toFixed(3)}
+                    </td>
+
+
+                    <td>
+                        ${imageHtml}
+                    </td>
+
+
+                    <td>
+
+                        <form
+                            method="POST"
+                            action="/log/${log.id}/delete"
+                            onsubmit="
+                                return confirm(
+                                    'Delete this access record and its captured image?'
+                                );
+                            "
+                        >
+
+                            <input
+                                type="hidden"
+                                name="return_to"
+                                value="dashboard"
+                            >
+
+                            <button
+                                class="
+                                    btn
+                                    delete-btn
+                                "
+                                type="submit"
+                            >
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                `;
+
+
+                logsTable.appendChild(
+                    row
+                );
+
+
+            }
+        );
+
+
+        document
+            .querySelectorAll(
+                ".face-thumb"
+            )
+            .forEach(
+                image => {
+
+                    image.onclick =
+                        () => {
+
+                            openImageModal(
+                                image.dataset.image,
+                                "Captured Face"
+                            );
+
+                        };
+
+                }
+            );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+
+document.getElementById(
+    "mark-alerts-reviewed"
+).addEventListener(
+    "click",
+    async () => {
+
+        try {
+
+
+            const response =
+                await fetch(
+                    "/api/dashboard",
+                    {
+                        cache:
+                            "no-store"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            localStorage.setItem(
+                "faceaccess-last-seen-denied",
+                data.security_alerts
+                    .latest_id
+            );
+
+
+            document.getElementById(
+                "security-alert"
+            ).style.display =
+                "none";
+
+
+        }
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+);
+
+
+
+setInterval(
+    updateDashboard,
+    3000
+);
+
+
+updateDashboard();
+
+
+</script>
+
+
+</body>
+
+</html>

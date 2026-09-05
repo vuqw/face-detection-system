@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Users - FaceAccess</title>
+
+
+    <script>
+
+        const savedTheme =
+            localStorage.getItem(
+                "faceaccess-theme"
+            );
+
+        if (savedTheme) {
+
+            document.documentElement
+                .setAttribute(
+                    "data-theme",
+                    savedTheme
+                );
+
+        }
+
+    </script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        :root {
+
+            --bg: #f4f6fa;
+
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+
+            --text: #111827;
+            --muted: #6b7280;
+
+            --border: #e5e7eb;
+
+            --sidebar: #111827;
+            --sidebar-hover: #1f2937;
+
+            --green: #16a34a;
+            --green-bg: #dcfce7;
+
+            --red: #dc2626;
+            --red-bg: #fee2e2;
+
+            --yellow: #ca8a04;
+            --yellow-bg: #fef9c3;
+
+            --blue: #2563eb;
+            --blue-bg: #dbeafe;
+
+            --row-hover: #fafafa;
+
+            --shadow:
+                0 3px 12px
+                rgba(0,0,0,0.03);
+
+        }
+
+
+        html[data-theme="dark"] {
+
+            --bg: #0b0f17;
+
+            --surface: #111827;
+            --surface-soft: #18202e;
+
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+
+            --border: #273244;
+
+            --sidebar: #080c13;
+            --sidebar-hover: #1a2230;
+
+            --green: #22c55e;
+
+            --green-bg:
+                rgba(34,197,94,0.14);
+
+            --red: #ef4444;
+
+            --red-bg:
+                rgba(239,68,68,0.14);
+
+            --yellow-bg:
+                rgba(234,179,8,0.14);
+
+            --blue-bg:
+                rgba(59,130,246,0.14);
+
+            --row-hover: #18202e;
+
+            --shadow:
+                0 3px 15px
+                rgba(0,0,0,0.25);
+
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background:
+                var(--bg);
+
+            color:
+                var(--text);
+
+        }
+
+
+        .app {
+
+            display: flex;
+
+            min-height: 100vh;
+
+        }
+
+
+        /* Sidebar */
+
+        .sidebar {
+
+            width: 250px;
+
+            background:
+                var(--sidebar);
+
+            color: white;
+
+            padding: 28px 20px;
+
+            position: fixed;
+
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 40px;
+
+        }
+
+
+        .brand-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #8b5cf6
+                );
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-size: 21px;
+
+        }
+
+
+        .brand-title {
+
+            font-weight: 700;
+
+            font-size: 17px;
+
+        }
+
+
+        .brand-subtitle {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            margin-top: 2px;
+
+        }
+
+
+        .nav-label {
+
+            color: #6b7280;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin:
+                15px
+                10px
+                8px;
+
+        }
+
+
+        .nav-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 12px 14px;
+
+            border-radius: 10px;
+
+            text-decoration: none;
+
+            color: #d1d5db;
+
+            margin-bottom: 5px;
+
+            font-size: 14px;
+
+        }
+
+
+        .nav-item:hover,
+        .nav-item.active {
+
+            color: white;
+
+            background:
+                var(--sidebar-hover);
+
+        }
+
+
+        .sidebar-bottom {
+
+            margin-top: auto;
+
+        }
+
+
+        .theme-button {
+
+            width: 100%;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            padding: 12px 14px;
+
+            background:
+                var(--sidebar-hover);
+
+            color: white;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            cursor: pointer;
+
+        }
+
+
+        /* Main */
+
+        .main {
+
+            margin-left: 250px;
+
+            width:
+                calc(100% - 250px);
+
+            padding: 35px;
+
+        }
+
+
+        .topbar {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content:
+                space-between;
+
+            margin-bottom: 28px;
+
+        }
+
+
+        h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+        }
+
+
+        .subtitle {
+
+            margin-top: 6px;
+
+            color:
+                var(--muted);
+
+            font-size: 14px;
+
+        }
+
+
+        .register-button {
+
+            background: #111827;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 10px;
+
+            padding: 11px 17px;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+        }
+
+
+        html[data-theme="dark"]
+        .register-button {
+
+            background: #f3f4f6;
+
+            color: #111827;
+
+        }
+
+
+        /* Stats */
+
+        .stats {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3,1fr);
+
+            gap: 15px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .stat-card {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            padding: 18px;
+
+            box-shadow:
+                var(--shadow);
+
+        }
+
+
+        .stat-label {
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+        }
+
+
+        .stat-number {
+
+            font-size: 28px;
+
+            font-weight: 700;
+
+            margin-top: 8px;
+
+        }
+
+
+        .active-number {
+            color: var(--green);
+        }
+
+
+        .disabled-number {
+            color: var(--red);
+        }
+
+
+        /* Filters */
+
+        .filters {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            padding: 18px;
+
+            display: grid;
+
+            grid-template-columns:
+                2fr
+                1fr
+                auto;
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+
+            box-shadow:
+                var(--shadow);
+
+        }
+
+
+        .input-group label {
+
+            display: block;
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            font-weight: 600;
+
+            margin-bottom: 6px;
+
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            height: 42px;
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 9px;
+
+            padding: 0 12px;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--text);
+
+            font-size: 13px;
+
+            outline: none;
+
+        }
+
+
+        input:focus,
+        select:focus {
+
+            border-color: #3b82f6;
+
+        }
+
+
+        .clear-button {
+
+            align-self: end;
+
+            height: 42px;
+
+            border: 0;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            padding: 0 17px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+        }
+
+
+        html[data-theme="dark"]
+        .clear-button {
+
+            background: #f3f4f6;
+
+            color: #111827;
+
+        }
+
+
+        /* Table */
+
+        .section {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            overflow: hidden;
+
+            box-shadow:
+                var(--shadow);
+
+        }
+
+
+        .section-header {
+
+            padding: 18px 20px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        .section-title {
+
+            font-size: 16px;
+
+            font-weight: 650;
+
+        }
+
+
+        .section-description {
+
+            margin-top: 4px;
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+        }
+
+
+        th {
+
+            padding: 12px 18px;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--muted);
+
+            text-align: left;
+
+            font-size: 12px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        td {
+
+            padding: 15px 18px;
+
+            font-size: 14px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        tbody tr:hover {
+
+            background:
+                var(--row-hover);
+
+        }
+
+
+        tbody tr:last-child td {
+
+            border-bottom: 0;
+
+        }
+
+
+        /* User */
+
+        .user-cell {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+        }
+
+
+        .avatar {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 11px;
+
+            object-fit: cover;
+
+            border:
+                1px solid
+                var(--border);
+
+            background:
+                var(--surface-soft);
+
+        }
+
+
+        .avatar-fallback {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 11px;
+
+            background:
+                var(--blue-bg);
+
+            color:
+                var(--blue);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-weight: 700;
+
+        }
+
+
+        .profile-link {
+
+            text-decoration: none;
+
+            color:
+                var(--text);
+
+            font-weight: 650;
+
+        }
+
+
+        .profile-link:hover {
+
+            color:
+                var(--blue);
+
+        }
+
+
+        .user-id {
+
+            color:
+                var(--muted);
+
+        }
+
+
+        /* Date */
+
+        .date-main {
+            font-weight: 600;
+        }
+
+
+        .date-secondary {
+
+            display: block;
+
+            margin-top: 3px;
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+        }
+
+
+        /* Status */
+
+        .status-pill {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            border-radius: 20px;
+
+            padding: 5px 10px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+        }
+
+
+        .active {
+
+            background:
+                var(--green-bg);
+
+            color:
+                var(--green);
+
+        }
+
+
+        .disabled {
+
+            background:
+                var(--red-bg);
+
+            color:
+                var(--red);
+
+        }
+
+
+        .granted {
+
+            background:
+                var(--green-bg);
+
+            color:
+                var(--green);
+
+        }
+
+
+        .denied {
+
+            background:
+                var(--red-bg);
+
+            color:
+                var(--red);
+
+        }
+
+
+        .activity-disabled {
+
+            background:
+                var(--yellow-bg);
+
+            color:
+                var(--yellow);
+
+        }
+
+
+        .no-activity {
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+        }
+
+
+        /* Actions */
+
+        .actions {
+
+            display: flex;
+
+            gap: 7px;
+
+            align-items: center;
+
+        }
+
+
+        .actions form {
+            margin: 0;
+        }
+
+
+        .btn {
+
+            border: 0;
+
+            border-radius: 8px;
+
+            padding: 7px 11px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+            font-size: 12px;
+
+        }
+
+
+        .view-btn {
+
+            text-decoration: none;
+
+            background:
+                var(--blue-bg);
+
+            color:
+                var(--blue);
+
+        }
+
+
+        .enable-btn {
+
+            color:
+                var(--green);
+
+            background:
+                var(--green-bg);
+
+        }
+
+
+        .disable-btn {
+
+            color:
+                var(--yellow);
+
+            background:
+                var(--yellow-bg);
+
+        }
+
+
+        .delete-btn {
+
+            color:
+                var(--red);
+
+            background:
+                var(--red-bg);
+
+        }
+
+
+        .similarity {
+
+            font-family:
+                Consolas,
+                monospace;
+
+        }
+
+
+        .empty {
+
+            text-align: center;
+
+            padding: 50px;
+
+            color:
+                var(--muted);
+
+        }
+
+
+        @media(max-width:1000px) {
+
+            .sidebar {
+                display: none;
+            }
+
+
+            .main {
+
+                margin-left: 0;
+
+                width: 100%;
+
+            }
+
+        }
+
+
+        @media(max-width:700px) {
+
+            .main {
+                padding: 20px;
+            }
+
+
+            .topbar {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+
+                gap: 15px;
+
+            }
+
+
+            .stats {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .filters {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .section {
+                overflow-x: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ◉
+            </div>
+
+            <div>
+
+                <div class="brand-title">
+                    FaceAccess
+                </div>
+
+                <div class="brand-subtitle">
+                    Smart Security
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="nav-label">
+            Main
+        </div>
+
+
+        <a
+            href="/"
+            class="nav-item"
+        >
+            ▦ Dashboard
+        </a>
+
+
+        <a
+            href="/users"
+            class="nav-item active"
+        >
+            👤 Users
+        </a>
+
+
+        <a
+            href="/register"
+            class="nav-item"
+        >
+            ＋ Register Person
+        </a>
+
+
+        <div class="nav-label">
+            System
+        </div>
+
+
+        <a
+            href="/#recognition-section"
+            class="nav-item"
+        >
+            ◎ Face Recognition
+        </a>
+
+
+        <a
+            href="/logs"
+            class="nav-item"
+        >
+            ◫ Access Logs
+        </a>
+
+
+        <div class="sidebar-bottom">
+
+            <button
+                id="theme-toggle"
+                class="theme-button"
+                type="button"
+            >
+
+                <span id="theme-text">
+                    Dark Mode
+                </span>
+
+                <span id="theme-icon">
+                    ☾
+                </span>
+
+            </button>
+
+        </div>
+
+
+    </aside>
+
+
+
+    <main class="main">
+
+
+        <div class="topbar">
+
+            <div>
+
+                <h1>
+                    Users
+                </h1>
+
+                <div class="subtitle">
+                    Manage registered people and their access.
+                </div>
+
+            </div>
+
+
+            <a
+                href="/register"
+                class="register-button"
+            >
+                ＋ Register New Person
+            </a>
+
+        </div>
+
+
+
+        <div class="stats">
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Total Users
+                </div>
+
+                <div
+                    class="stat-number"
+                    id="total-users"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Active Users
+                </div>
+
+                <div
+                    class="
+                        stat-number
+                        active-number
+                    "
+                    id="active-users"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-label">
+                    Disabled Users
+                </div>
+
+                <div
+                    class="
+                        stat-number
+                        disabled-number
+                    "
+                    id="disabled-users"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="filters">
+
+
+            <div class="input-group">
+
+                <label>
+                    SEARCH USER
+                </label>
+
+                <input
+                    id="search"
+                    type="text"
+                    placeholder="Type a name..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    STATUS
+                </label>
+
+                <select id="status">
+
+                    <option value="all">
+                        All Users
+                    </option>
+
+                    <option value="active">
+                        Active
+                    </option>
+
+                    <option value="disabled">
+                        Disabled
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <button
+                class="clear-button"
+                id="clear-filters"
+                type="button"
+            >
+                Clear
+            </button>
+
+
+        </div>
+
+
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <div class="section-title">
+                    Registered Users
+                </div>
+
+                <div class="section-description">
+                    Click a person's name to open their full profile.
+                </div>
+
+            </div>
+
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>User</th>
+
+                        <th>Registered</th>
+
+                        <th>Status</th>
+
+                        <th>Last Activity</th>
+
+                        <th>Similarity</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="users-table">
+                </tbody>
+
+
+            </table>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+   Theme
+========================= */
+
+
+const themeToggle =
+    document.getElementById(
+        "theme-toggle"
+    );
+
+
+function updateThemeButton() {
+
+    const dark =
+        document.documentElement
+            .getAttribute(
+                "data-theme"
+            )
+        ===
+        "dark";
+
+
+    document.getElementById(
+        "theme-text"
+    ).textContent =
+        dark
+            ? "Light Mode"
+            : "Dark Mode";
+
+
+    document.getElementById(
+        "theme-icon"
+    ).textContent =
+        dark
+            ? "☀"
+            : "☾";
+
+}
+
+
+themeToggle.addEventListener(
+    "click",
+    () => {
+
+
+        const current =
+            document.documentElement
+                .getAttribute(
+                    "data-theme"
+                );
+
+
+        const next =
+            current === "dark"
+                ? "light"
+                : "dark";
+
+
+        document.documentElement
+            .setAttribute(
+                "data-theme",
+                next
+            );
+
+
+        localStorage.setItem(
+            "faceaccess-theme",
+            next
+        );
+
+
+        updateThemeButton();
+
+    }
+);
+
+
+updateThemeButton();
+
+
+
+/* =========================
+   Security
+========================= */
+
+
+function escapeHtml(value) {
+
+    return String(value)
+
+        .replaceAll("&", "&amp;")
+
+        .replaceAll("<", "&lt;")
+
+        .replaceAll(">", "&gt;")
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================
+   Date
+========================= */
+
+
+function parseTimestamp(timestamp) {
+
+    const [
+        datePart,
+        timePart
+    ] = timestamp.split(" ");
+
+
+    const [
+        year,
+        month,
+        day
+    ] = datePart
+        .split("-")
+        .map(Number);
+
+
+    const [
+        hour,
+        minute,
+        second
+    ] = timePart
+        .split(":")
+        .map(Number);
+
+
+    return new Date(
+        year,
+        month - 1,
+        day,
+        hour,
+        minute,
+        second
+    );
+
+}
+
+
+function formatDate(timestamp) {
+
+    const date =
+        parseTimestamp(
+            timestamp
+        );
+
+
+    return {
+
+        date:
+            date.toLocaleDateString(
+                "en-US",
+                {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            ),
+
+        time:
+            date.toLocaleTimeString(
+                "en-US",
+                {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true
+                }
+            )
+
+    };
+
+}
+
+
+function formatActivity(timestamp) {
+
+    const date =
+        parseTimestamp(
+            timestamp
+        );
+
+
+    const now =
+        new Date();
+
+
+    const isToday =
+        date.getFullYear()
+            === now.getFullYear()
+        &&
+        date.getMonth()
+            === now.getMonth()
+        &&
+        date.getDate()
+            === now.getDate();
+
+
+    const time =
+        date.toLocaleTimeString(
+            "en-US",
+            {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            }
+        );
+
+
+    return {
+
+        main:
+            isToday
+                ? "Today"
+                : date.toLocaleDateString(
+                    "en-US",
+                    {
+                        month: "short",
+                        day: "numeric"
+                    }
+                ),
+
+        secondary:
+            time
+
+    };
+
+}
+
+
+
+/* =========================
+   Users
+========================= */
+
+
+let searchTimer = null;
+
+
+async function loadUsers() {
+
+
+    const search =
+        document.getElementById(
+            "search"
+        ).value;
+
+
+    const status =
+        document.getElementById(
+            "status"
+        ).value;
+
+
+    const params =
+        new URLSearchParams();
+
+
+    if (search) {
+
+        params.set(
+            "search",
+            search
+        );
+
+    }
+
+
+    if (status) {
+
+        params.set(
+            "status",
+            status
+        );
+
+    }
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/users?"
+                +
+                params.toString(),
+                {
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+
+        document.getElementById(
+            "total-users"
+        ).textContent =
+            data.summary.total;
+
+
+        document.getElementById(
+            "active-users"
+        ).textContent =
+            data.summary.active;
+
+
+        document.getElementById(
+            "disabled-users"
+        ).textContent =
+            data.summary.disabled;
+
+
+
+        const table =
+            document.getElementById(
+                "users-table"
+            );
+
+
+        table.innerHTML = "";
+
+
+        if (
+            data.users.length === 0
+        ) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="empty"
+                    >
+                        No matching users.
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+
+        data.users.forEach(
+            user => {
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const registered =
+                    formatDate(
+                        user.created_at
+                    );
+
+
+                const encodedName =
+                    encodeURIComponent(
+                        user.name
+                    );
+
+
+                const safeName =
+                    escapeHtml(
+                        user.name
+                    );
+
+
+                const profileUrl =
+                    `/users/${encodedName}`;
+
+
+                let avatar;
+
+
+                if (user.profile_image) {
+
+                    avatar = `
+
+                        <img
+                            class="avatar"
+                            src="${escapeHtml(
+                                user.profile_image
+                            )}"
+                            alt="Profile"
+                        >
+
+                    `;
+
+                }
+
+                else {
+
+                    avatar = `
+
+                        <div class="avatar-fallback">
+
+                            ${
+                                safeName
+                                    .charAt(0)
+                                    .toUpperCase()
+                            }
+
+                        </div>
+
+                    `;
+
+                }
+
+
+
+                const accountStatus =
+                    user.active
+
+                    ? `
+
+                        <span
+                            class="
+                                status-pill
+                                active
+                            "
+                        >
+                            ● Active
+                        </span>
+
+                    `
+
+                    : `
+
+                        <span
+                            class="
+                                status-pill
+                                disabled
+                            "
+                        >
+                            ● Disabled
+                        </span>
+
+                    `;
+
+
+
+                let lastActivity = `
+
+                    <span class="no-activity">
+                        No activity yet
+                    </span>
+
+                `;
+
+
+                let similarity = "—";
+
+
+                if (user.last_activity) {
+
+
+                    const activity =
+                        formatActivity(
+                            user.last_activity
+                                .timestamp
+                        );
+
+
+                    let statusHtml;
+
+
+                    if (
+                        user.last_activity
+                            .status
+                        ===
+                        "Granted"
+                    ) {
+
+                        statusHtml = `
+
+                            <span
+                                class="
+                                    status-pill
+                                    granted
+                                "
+                            >
+                                ✓ Granted
+                            </span>
+
+                        `;
+
+                    }
+
+                    else if (
+                        user.last_activity
+                            .status
+                        ===
+                        "Disabled"
+                    ) {
+
+                        statusHtml = `
+
+                            <span
+                                class="
+                                    status-pill
+                                    activity-disabled
+                                "
+                            >
+                                Disabled
+                            </span>
+
+                        `;
+
+                    }
+
+                    else {
+
+                        statusHtml = `
+
+                            <span
+                                class="
+                                    status-pill
+                                    denied
+                                "
+                            >
+                                × Denied
+                            </span>
+
+                        `;
+
+                    }
+
+
+                    lastActivity = `
+
+                        <div>
+
+                            ${statusHtml}
+
+                            <span
+                                class="date-secondary"
+                            >
+                                ${activity.main}
+                                •
+                                ${activity.secondary}
+                            </span>
+
+                        </div>
+
+                    `;
+
+
+                    similarity =
+                        Number(
+                            user.last_activity
+                                .similarity
+                        ).toFixed(3);
+
+                }
+
+
+
+                const controlButton =
+                    user.active
+
+                    ? `
+
+                        <form
+                            method="POST"
+                            action="/user/${encodedName}/disable"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="return_to"
+                                value="users"
+                            >
+
+                            <button
+                                class="
+                                    btn
+                                    disable-btn
+                                "
+                                type="submit"
+                            >
+                                Disable
+                            </button>
+
+                        </form>
+
+                    `
+
+                    : `
+
+                        <form
+                            method="POST"
+                            action="/user/${encodedName}/enable"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="return_to"
+                                value="users"
+                            >
+
+                            <button
+                                class="
+                                    btn
+                                    enable-btn
+                                "
+                                type="submit"
+                            >
+                                Enable
+                            </button>
+
+                        </form>
+
+                    `;
+
+
+
+                row.innerHTML = `
+
+
+                    <td>
+
+                        <span class="user-id">
+                            #${user.id}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <div class="user-cell">
+
+                            ${avatar}
+
+                            <a
+                                class="profile-link"
+                                href="${profileUrl}"
+                            >
+                                ${safeName}
+                            </a>
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        <span class="date-main">
+                            ${registered.date}
+                        </span>
+
+                        <span class="date-secondary">
+                            ${registered.time}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+                        ${accountStatus}
+                    </td>
+
+
+                    <td>
+                        ${lastActivity}
+                    </td>
+
+
+                    <td class="similarity">
+                        ${similarity}
+                    </td>
+
+
+                    <td>
+
+                        <div class="actions">
+
+
+                            <a
+                                href="${profileUrl}"
+                                class="
+                                    btn
+                                    view-btn
+                                "
+                            >
+                                View
+                            </a>
+
+
+                            ${controlButton}
+
+
+                            <form
+                                method="POST"
+                                action="/user/${encodedName}/delete"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="return_to"
+                                    value="users"
+                                >
+
+                                <button
+                                    class="
+                                        btn
+                                        delete-btn
+                                    "
+                                    type="submit"
+                                    onclick="
+                                        return confirm(
+                                            'Delete this user permanently?'
+                                        );
+                                    "
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
+
+                        </div>
+
+                    </td>
+
+
+                `;
+
+
+                table.appendChild(
+                    row
+                );
+
+
+            }
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Failed to load users:",
+            error
+        );
+
+    }
+
+}
+
+
+
+document.getElementById(
+    "search"
+).addEventListener(
+    "input",
+    () => {
+
+        clearTimeout(
+            searchTimer
+        );
+
+        searchTimer =
+            setTimeout(
+                loadUsers,
+                250
+            );
+
+    }
+);
+
+
+document.getElementById(
+    "status"
+).addEventListener(
+    "change",
+    loadUsers
+);
+
+
+document.getElementById(
+    "clear-filters"
+).addEventListener(
+    "click",
+    () => {
+
+
+        document.getElementById(
+            "search"
+        ).value = "";
+
+
+        document.getElementById(
+            "status"
+        ).value = "all";
+
+
+        loadUsers();
+
+    }
+);
+
+
+setInterval(
+    loadUsers,
+    3000
+);
+
+
+loadUsers();
+
+
+</script>
+
+
+</body>
+
+</html>

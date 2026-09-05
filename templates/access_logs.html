@@ -1,0 +1,2577 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Access Logs - FaceAccess</title>
+
+
+    <script>
+
+        const savedTheme =
+            localStorage.getItem(
+                "faceaccess-theme"
+            );
+
+        if (savedTheme) {
+
+            document.documentElement
+                .setAttribute(
+                    "data-theme",
+                    savedTheme
+                );
+
+        }
+
+    </script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        :root {
+
+            --bg: #f4f6fa;
+
+            --surface: #ffffff;
+            --surface-soft: #f8fafc;
+
+            --text: #111827;
+            --muted: #6b7280;
+
+            --border: #e5e7eb;
+
+            --sidebar: #111827;
+            --sidebar-hover: #1f2937;
+
+            --green: #16a34a;
+            --green-bg: #dcfce7;
+
+            --red: #dc2626;
+            --red-bg: #fee2e2;
+
+            --yellow: #ca8a04;
+            --yellow-bg: #fef9c3;
+
+            --blue: #2563eb;
+            --blue-bg: #dbeafe;
+
+            --row-hover: #fafafa;
+
+        }
+
+
+        html[data-theme="dark"] {
+
+            --bg: #0b0f17;
+
+            --surface: #111827;
+            --surface-soft: #18202e;
+
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+
+            --border: #273244;
+
+            --sidebar: #080c13;
+            --sidebar-hover: #1a2230;
+
+            --green: #22c55e;
+
+            --green-bg:
+                rgba(
+                    34,
+                    197,
+                    94,
+                    0.14
+                );
+
+            --red: #ef4444;
+
+            --red-bg:
+                rgba(
+                    239,
+                    68,
+                    68,
+                    0.14
+                );
+
+            --yellow-bg:
+                rgba(
+                    234,
+                    179,
+                    8,
+                    0.14
+                );
+
+            --blue-bg:
+                rgba(
+                    59,
+                    130,
+                    246,
+                    0.14
+                );
+
+            --row-hover: #18202e;
+
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background:
+                var(--bg);
+
+            color:
+                var(--text);
+
+        }
+
+
+        .app {
+
+            display: flex;
+
+            min-height: 100vh;
+
+        }
+
+
+        /* =========================
+           Sidebar
+        ========================= */
+
+        .sidebar {
+
+            width: 250px;
+
+            background:
+                var(--sidebar);
+
+            color: white;
+
+            padding: 28px 20px;
+
+            position: fixed;
+
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            z-index: 10;
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 40px;
+
+        }
+
+
+        .brand-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #8b5cf6
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 21px;
+
+        }
+
+
+        .brand-title {
+
+            font-weight: 700;
+
+            font-size: 17px;
+
+        }
+
+
+        .brand-subtitle {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            margin-top: 2px;
+
+        }
+
+
+        .nav-label {
+
+            color: #6b7280;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin:
+                15px
+                10px
+                8px;
+
+        }
+
+
+        .nav-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 12px 14px;
+
+            border-radius: 10px;
+
+            color: #d1d5db;
+
+            text-decoration: none;
+
+            margin-bottom: 5px;
+
+            font-size: 14px;
+
+        }
+
+
+        .nav-item:hover,
+        .nav-item.active {
+
+            background:
+                var(--sidebar-hover);
+
+            color: white;
+
+        }
+
+
+        .sidebar-bottom {
+
+            margin-top: auto;
+
+        }
+
+
+        .theme-button {
+
+            width: 100%;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            padding: 12px 14px;
+
+            background:
+                var(--sidebar-hover);
+
+            color: white;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            cursor: pointer;
+
+        }
+
+
+        /* =========================
+           Main
+        ========================= */
+
+        .main {
+
+            margin-left: 250px;
+
+            width:
+                calc(
+                    100% - 250px
+                );
+
+            padding: 35px;
+
+        }
+
+
+        .topbar {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-bottom: 28px;
+
+        }
+
+
+        h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+        }
+
+
+        .subtitle {
+
+            color:
+                var(--muted);
+
+            margin-top: 6px;
+
+            font-size: 14px;
+
+        }
+
+
+        .back-button {
+
+            text-decoration: none;
+
+            background:
+                var(--surface);
+
+            color:
+                var(--text);
+
+            border:
+                1px solid
+                var(--border);
+
+            padding: 10px 15px;
+
+            border-radius: 9px;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+        }
+
+
+        /* =========================
+           Summary
+        ========================= */
+
+        .summary-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .summary-card {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            padding: 18px;
+
+        }
+
+
+        .summary-label {
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+        }
+
+
+        .summary-value {
+
+            margin-top: 9px;
+
+            font-size: 27px;
+
+            font-weight: 700;
+
+        }
+
+
+        .green {
+            color: var(--green);
+        }
+
+
+        .red {
+            color: var(--red);
+        }
+
+
+        .yellow {
+            color: var(--yellow);
+        }
+
+
+        /* =========================
+           Filters
+        ========================= */
+
+        .filters {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            padding: 18px;
+
+            display: grid;
+
+            grid-template-columns:
+                2fr
+                1fr
+                1fr
+                auto;
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .input-group label {
+
+            display: block;
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            font-weight: 600;
+
+            margin-bottom: 6px;
+
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            height: 42px;
+
+            padding: 0 12px;
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 9px;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--text);
+
+            outline: none;
+
+            font-size: 13px;
+
+        }
+
+
+        input:focus,
+        select:focus {
+
+            border-color:
+                #3b82f6;
+
+        }
+
+
+        .clear-btn {
+
+            align-self: end;
+
+            height: 42px;
+
+            border: 0;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            padding: 0 17px;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+        }
+
+
+        html[data-theme="dark"]
+        .clear-btn {
+
+            background: #f3f4f6;
+
+            color: #111827;
+
+        }
+
+
+        /* =========================
+           Table
+        ========================= */
+
+        .section {
+
+            background:
+                var(--surface);
+
+            border:
+                1px solid
+                var(--border);
+
+            border-radius: 14px;
+
+            overflow: hidden;
+
+        }
+
+
+        .section-header {
+
+            padding: 18px 20px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        .section-title {
+
+            font-weight: 650;
+
+        }
+
+
+        .section-description {
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+            margin-top: 4px;
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse:
+                collapse;
+
+        }
+
+
+        th {
+
+            text-align: left;
+
+            padding: 12px 18px;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+        }
+
+
+        td {
+
+            padding: 15px 18px;
+
+            border-bottom:
+                1px solid
+                var(--border);
+
+            font-size: 14px;
+
+        }
+
+
+        tbody tr:hover {
+
+            background:
+                var(--row-hover);
+
+        }
+
+
+        tbody tr:last-child td {
+
+            border-bottom: 0;
+
+        }
+
+
+        .person {
+
+            font-weight: 600;
+
+        }
+
+
+        .time-main {
+
+            font-weight: 600;
+
+        }
+
+
+        .time-secondary {
+
+            display: block;
+
+            margin-top: 3px;
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+        }
+
+
+        .status-pill {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            border-radius: 20px;
+
+            padding: 5px 10px;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+        }
+
+
+        .granted {
+
+            background:
+                var(--green-bg);
+
+            color:
+                var(--green);
+
+        }
+
+
+        .denied {
+
+            background:
+                var(--red-bg);
+
+            color:
+                var(--red);
+
+        }
+
+
+        .disabled {
+
+            background:
+                var(--yellow-bg);
+
+            color:
+                var(--yellow);
+
+        }
+
+
+        .similarity {
+
+            font-family:
+                Consolas,
+                monospace;
+
+        }
+
+
+        /* =========================
+           Face image
+        ========================= */
+
+        .face-thumb {
+
+            width: 58px;
+            height: 58px;
+
+            object-fit: cover;
+
+            border-radius: 10px;
+
+            border:
+                1px solid
+                var(--border);
+
+            cursor: pointer;
+
+            transition:
+                transform 0.15s;
+
+        }
+
+
+        .face-thumb:hover {
+
+            transform:
+                scale(1.07);
+
+        }
+
+
+        .no-photo {
+
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+        }
+
+
+        /* =========================
+           Delete
+        ========================= */
+
+        .delete-log-btn {
+
+            border: 0;
+
+            border-radius: 8px;
+
+            padding: 7px 11px;
+
+            background:
+                var(--red-bg);
+
+            color:
+                var(--red);
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+        }
+
+
+        .delete-log-btn:hover {
+
+            opacity: 0.8;
+
+        }
+
+
+        /* =========================
+           States
+        ========================= */
+
+        .empty {
+
+            text-align: center;
+
+            padding: 50px;
+
+            color:
+                var(--muted);
+
+        }
+
+
+        .error-box {
+
+            margin: 20px;
+
+            padding: 16px;
+
+            background:
+                var(--red-bg);
+
+            color:
+                var(--red);
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            display: none;
+
+        }
+
+
+        /* =========================
+           Modal
+        ========================= */
+
+        .image-modal {
+
+            display: none;
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 999;
+
+            background:
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.80
+                );
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+        }
+
+
+        .image-modal.show {
+
+            display: flex;
+
+        }
+
+
+        .modal-card {
+
+            width: 100%;
+
+            max-width: 520px;
+
+            background:
+                var(--surface);
+
+            padding: 16px;
+
+            border-radius: 16px;
+
+        }
+
+
+        .modal-header {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .modal-close {
+
+            border: 0;
+
+            width: 34px;
+            height: 34px;
+
+            border-radius: 8px;
+
+            background:
+                var(--surface-soft);
+
+            color:
+                var(--text);
+
+            cursor: pointer;
+
+            font-size: 18px;
+
+        }
+
+
+        .modal-image {
+
+            display: block;
+
+            width: 100%;
+
+            max-height: 70vh;
+
+            object-fit: contain;
+
+            border-radius: 12px;
+
+            background: black;
+
+        }
+
+
+        /* =========================
+           Responsive
+        ========================= */
+
+        @media (
+            max-width: 1000px
+        ) {
+
+            .sidebar {
+
+                display: none;
+
+            }
+
+
+            .main {
+
+                margin-left: 0;
+
+                width: 100%;
+
+            }
+
+
+            .summary-grid {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+            }
+
+
+            .filters {
+
+                grid-template-columns:
+                    1fr 1fr;
+
+            }
+
+        }
+
+
+        @media (
+            max-width: 650px
+        ) {
+
+            .main {
+
+                padding: 20px;
+
+            }
+
+
+            .topbar {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 15px;
+
+            }
+
+
+            .summary-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .filters {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .section {
+
+                overflow-x: auto;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- =========================
+         Sidebar
+    ========================== -->
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+
+            <div class="brand-icon">
+                ◉
+            </div>
+
+
+            <div>
+
+                <div class="brand-title">
+                    FaceAccess
+                </div>
+
+                <div class="brand-subtitle">
+                    Smart Security
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="nav-label">
+            Main
+        </div>
+
+
+        <a
+            href="/"
+            class="nav-item"
+        >
+            ▦ Dashboard
+        </a>
+
+
+        <a
+            href="/users"
+            class="nav-item"
+        >
+            👤 Users
+        </a>
+
+
+        <a
+            href="/register"
+            class="nav-item"
+        >
+            ＋ Register Person
+        </a>
+
+
+
+        <div class="nav-label">
+            System
+        </div>
+
+
+        <a
+            href="/#recognition-section"
+            class="nav-item"
+        >
+            ◎ Face Recognition
+        </a>
+
+
+        <a
+            href="/logs"
+            class="nav-item active"
+        >
+            ◫ Access Logs
+        </a>
+
+
+
+        <div class="sidebar-bottom">
+
+
+            <button
+                id="theme-toggle"
+                class="theme-button"
+                type="button"
+            >
+
+                <span id="theme-text">
+                    Dark Mode
+                </span>
+
+                <span id="theme-icon">
+                    ☾
+                </span>
+
+            </button>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =========================
+         Main
+    ========================== -->
+
+    <main class="main">
+
+
+        <div class="topbar">
+
+
+            <div>
+
+                <h1>
+                    Access Logs
+                </h1>
+
+                <div class="subtitle">
+                    Review, filter and delete access history.
+                </div>
+
+            </div>
+
+
+            <a
+                href="/"
+                class="back-button"
+            >
+                ← Dashboard
+            </a>
+
+
+        </div>
+
+
+
+        <!-- Summary -->
+
+
+        <div class="summary-grid">
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Results
+                </div>
+
+                <div
+                    id="result-count"
+                    class="summary-value"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Granted
+                </div>
+
+                <div
+                    id="granted-count"
+                    class="
+                        summary-value
+                        green
+                    "
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Denied
+                </div>
+
+                <div
+                    id="denied-count"
+                    class="
+                        summary-value
+                        red
+                    "
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="summary-card">
+
+                <div class="summary-label">
+                    Disabled
+                </div>
+
+                <div
+                    id="disabled-count"
+                    class="
+                        summary-value
+                        yellow
+                    "
+                >
+                    0
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- Filters -->
+
+
+        <div class="filters">
+
+
+            <div class="input-group">
+
+                <label>
+                    SEARCH PERSON
+                </label>
+
+                <input
+                    id="search"
+                    type="text"
+                    placeholder="Type a name..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    STATUS
+                </label>
+
+                <select id="status">
+
+                    <option value="all">
+                        All Statuses
+                    </option>
+
+                    <option value="Granted">
+                        Granted
+                    </option>
+
+                    <option value="Denied">
+                        Denied
+                    </option>
+
+                    <option value="Disabled">
+                        Disabled
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    DATE
+                </label>
+
+                <input
+                    id="date"
+                    type="date"
+                >
+
+            </div>
+
+
+            <button
+                id="clear-filters"
+                class="clear-btn"
+                type="button"
+            >
+                Clear
+            </button>
+
+
+        </div>
+
+
+
+        <!-- Logs -->
+
+
+        <section class="section">
+
+
+            <div class="section-header">
+
+                <div class="section-title">
+                    Access History
+                </div>
+
+                <div class="section-description">
+                    All stored access attempts.
+                </div>
+
+            </div>
+
+
+            <div
+                id="error-box"
+                class="error-box"
+            >
+            </div>
+
+
+            <table>
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Person</th>
+
+                        <th>Date & Time</th>
+
+                        <th>Status</th>
+
+                        <th>Similarity</th>
+
+                        <th>Face</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="logs-table">
+
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="empty"
+                        >
+                            Loading access logs...
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </section>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =========================
+     Image Modal
+========================== -->
+
+<div
+    id="image-modal"
+    class="image-modal"
+>
+
+
+    <div class="modal-card">
+
+
+        <div class="modal-header">
+
+
+            <strong id="modal-title">
+                Captured Face
+            </strong>
+
+
+            <button
+                id="modal-close"
+                class="modal-close"
+                type="button"
+            >
+                ×
+            </button>
+
+
+        </div>
+
+
+        <img
+            id="modal-image"
+            class="modal-image"
+            alt="Captured face"
+        >
+
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+   Theme
+========================= */
+
+
+function updateThemeButton() {
+
+    const dark =
+        document.documentElement
+            .getAttribute(
+                "data-theme"
+            )
+        ===
+        "dark";
+
+
+    document.getElementById(
+        "theme-text"
+    ).textContent =
+        dark
+            ? "Light Mode"
+            : "Dark Mode";
+
+
+    document.getElementById(
+        "theme-icon"
+    ).textContent =
+        dark
+            ? "☀"
+            : "☾";
+
+}
+
+
+
+document.getElementById(
+    "theme-toggle"
+).addEventListener(
+    "click",
+    () => {
+
+
+        const current =
+            document.documentElement
+                .getAttribute(
+                    "data-theme"
+                );
+
+
+        const next =
+            current === "dark"
+                ? "light"
+                : "dark";
+
+
+        document.documentElement
+            .setAttribute(
+                "data-theme",
+                next
+            );
+
+
+        localStorage.setItem(
+            "faceaccess-theme",
+            next
+        );
+
+
+        updateThemeButton();
+
+
+    }
+);
+
+
+updateThemeButton();
+
+
+
+/* =========================
+   Escape HTML
+========================= */
+
+
+function escapeHtml(value) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================
+   Date
+========================= */
+
+
+function parseTimestamp(timestamp) {
+
+    if (!timestamp) {
+
+        return null;
+
+    }
+
+
+    const parts =
+        String(timestamp)
+            .trim()
+            .split(" ");
+
+
+    if (
+        parts.length < 2
+    ) {
+
+        return null;
+
+    }
+
+
+    const dateParts =
+        parts[0]
+            .split("-")
+            .map(Number);
+
+
+    const timeParts =
+        parts[1]
+            .split(":")
+            .map(Number);
+
+
+    if (
+        dateParts.length !== 3
+        ||
+        timeParts.length < 2
+    ) {
+
+        return null;
+
+    }
+
+
+    return new Date(
+
+        dateParts[0],
+
+        dateParts[1] - 1,
+
+        dateParts[2],
+
+        timeParts[0],
+
+        timeParts[1],
+
+        timeParts[2] || 0
+
+    );
+
+}
+
+
+
+function formatDateTime(timestamp) {
+
+    const date =
+        parseTimestamp(
+            timestamp
+        );
+
+
+    if (!date) {
+
+        return {
+            date:
+                timestamp || "Unknown",
+
+            time:
+                ""
+        };
+
+    }
+
+
+    return {
+
+        date:
+            date.toLocaleDateString(
+                "en-US",
+                {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                }
+            ),
+
+        time:
+            date.toLocaleTimeString(
+                "en-US",
+                {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true
+                }
+            )
+
+    };
+
+}
+
+
+
+/* =========================
+   Modal
+========================= */
+
+
+const modal =
+    document.getElementById(
+        "image-modal"
+    );
+
+
+function openImageModal(
+    url,
+    title
+) {
+
+    document.getElementById(
+        "modal-image"
+    ).src =
+        url;
+
+
+    document.getElementById(
+        "modal-title"
+    ).textContent =
+        title;
+
+
+    modal.classList.add(
+        "show"
+    );
+
+}
+
+
+
+function closeImageModal() {
+
+    modal.classList.remove(
+        "show"
+    );
+
+}
+
+
+
+document.getElementById(
+    "modal-close"
+).addEventListener(
+    "click",
+    closeImageModal
+);
+
+
+
+modal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target === modal
+        ) {
+
+            closeImageModal();
+
+        }
+
+    }
+);
+
+
+
+/* =========================
+   URL Filters
+========================= */
+
+
+function loadFiltersFromUrl() {
+
+    const urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const search =
+        urlParams.get(
+            "search"
+        );
+
+
+    const status =
+        urlParams.get(
+            "status"
+        );
+
+
+    const date =
+        urlParams.get(
+            "date"
+        );
+
+
+    if (search) {
+
+        document.getElementById(
+            "search"
+        ).value =
+            search;
+
+    }
+
+
+    if (
+        status
+        &&
+        [
+            "Granted",
+            "Denied",
+            "Disabled"
+        ].includes(
+            status
+        )
+    ) {
+
+        document.getElementById(
+            "status"
+        ).value =
+            status;
+
+    }
+
+
+    if (date) {
+
+        document.getElementById(
+            "date"
+        ).value =
+            date;
+
+    }
+
+}
+
+
+
+/* =========================
+   Access Logs
+========================= */
+
+
+let searchTimer = null;
+
+
+async function loadLogs() {
+
+
+    const errorBox =
+        document.getElementById(
+            "error-box"
+        );
+
+
+    errorBox.style.display =
+        "none";
+
+
+    errorBox.textContent =
+        "";
+
+
+    const search =
+        document.getElementById(
+            "search"
+        ).value.trim();
+
+
+    const status =
+        document.getElementById(
+            "status"
+        ).value;
+
+
+    const date =
+        document.getElementById(
+            "date"
+        ).value;
+
+
+    const params =
+        new URLSearchParams();
+
+
+    if (search) {
+
+        params.set(
+            "search",
+            search
+        );
+
+    }
+
+
+    params.set(
+        "status",
+        status || "all"
+    );
+
+
+    if (date) {
+
+        params.set(
+            "date",
+            date
+        );
+
+    }
+
+
+    const apiUrl =
+        "/api/logs?"
+        +
+        params.toString();
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                apiUrl,
+                {
+                    method:
+                        "GET",
+
+                    cache:
+                        "no-store",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            const responseText =
+                await response.text();
+
+
+            throw new Error(
+                `API returned ${response.status}: ${responseText.slice(0, 150)}`
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            !data
+            ||
+            !Array.isArray(
+                data.logs
+            )
+        ) {
+
+            throw new Error(
+                "Invalid data returned from /api/logs"
+            );
+
+        }
+
+
+
+        document.getElementById(
+            "result-count"
+        ).textContent =
+            Number(
+                data.count || 0
+            );
+
+
+        document.getElementById(
+            "granted-count"
+        ).textContent =
+            Number(
+                data.summary?.granted
+                || 0
+            );
+
+
+        document.getElementById(
+            "denied-count"
+        ).textContent =
+            Number(
+                data.summary?.denied
+                || 0
+            );
+
+
+        document.getElementById(
+            "disabled-count"
+        ).textContent =
+            Number(
+                data.summary?.disabled
+                || 0
+            );
+
+
+
+        const table =
+            document.getElementById(
+                "logs-table"
+            );
+
+
+        table.innerHTML =
+            "";
+
+
+        if (
+            data.logs.length === 0
+        ) {
+
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="empty"
+                    >
+                        No access logs match the selected filters.
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            return;
+
+        }
+
+
+
+        data.logs.forEach(
+            log => {
+
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const dateTime =
+                    formatDateTime(
+                        log.timestamp
+                    );
+
+
+
+                let statusHtml;
+
+
+                if (
+                    log.status ===
+                    "Granted"
+                ) {
+
+
+                    statusHtml = `
+
+                        <span
+                            class="
+                                status-pill
+                                granted
+                            "
+                        >
+                            ✓ Granted
+                        </span>
+
+                    `;
+
+
+                }
+
+                else if (
+                    log.status ===
+                    "Disabled"
+                ) {
+
+
+                    statusHtml = `
+
+                        <span
+                            class="
+                                status-pill
+                                disabled
+                            "
+                        >
+                            Disabled
+                        </span>
+
+                    `;
+
+
+                }
+
+                else {
+
+
+                    statusHtml = `
+
+                        <span
+                            class="
+                                status-pill
+                                denied
+                            "
+                        >
+                            × Denied
+                        </span>
+
+                    `;
+
+
+                }
+
+
+
+                let faceHtml;
+
+
+                if (
+                    log.image_url
+                ) {
+
+
+                    faceHtml = `
+
+                        <img
+                            src="${escapeHtml(
+                                log.image_url
+                            )}"
+                            class="face-thumb"
+                            data-image="${escapeHtml(
+                                log.image_url
+                            )}"
+                            data-name="${escapeHtml(
+                                log.name
+                            )}"
+                            alt="Captured face"
+                        >
+
+                    `;
+
+
+                }
+
+                else {
+
+
+                    faceHtml = `
+
+                        <span class="no-photo">
+                            No image
+                        </span>
+
+                    `;
+
+
+                }
+
+
+
+                row.innerHTML = `
+
+
+                    <td>
+
+                        #${Number(
+                            log.id
+                        )}
+
+                    </td>
+
+
+                    <td class="person">
+
+                        ${escapeHtml(
+                            log.name
+                        )}
+
+                    </td>
+
+
+                    <td>
+
+                        <span class="time-main">
+
+                            ${escapeHtml(
+                                dateTime.date
+                            )}
+
+                        </span>
+
+                        <span class="time-secondary">
+
+                            ${escapeHtml(
+                                dateTime.time
+                            )}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        ${statusHtml}
+
+                    </td>
+
+
+                    <td class="similarity">
+
+                        ${Number(
+                            log.similarity
+                        ).toFixed(3)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${faceHtml}
+
+                    </td>
+
+
+                    <td>
+
+                        <form
+                            method="POST"
+                            action="/log/${Number(
+                                log.id
+                            )}/delete"
+                            onsubmit="
+                                return confirm(
+                                    'Delete this access record and its captured image?'
+                                );
+                            "
+                        >
+
+                            <input
+                                type="hidden"
+                                name="return_to"
+                                value="logs"
+                            >
+
+                            <button
+                                type="submit"
+                                class="delete-log-btn"
+                            >
+                                Delete
+                            </button>
+
+                        </form>
+
+                    </td>
+
+
+                `;
+
+
+                table.appendChild(
+                    row
+                );
+
+
+            }
+        );
+
+
+
+        document
+            .querySelectorAll(
+                ".face-thumb"
+            )
+            .forEach(
+                image => {
+
+
+                    image.addEventListener(
+                        "click",
+                        () => {
+
+
+                            openImageModal(
+
+                                image.dataset
+                                    .image,
+
+                                `${
+                                    image.dataset
+                                        .name
+                                } - Captured Face`
+
+                            );
+
+
+                        }
+                    );
+
+
+                }
+            );
+
+
+    }
+
+    catch (error) {
+
+
+        console.error(
+            "Access Logs error:",
+            error
+        );
+
+
+        const table =
+            document.getElementById(
+                "logs-table"
+            );
+
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="empty"
+                >
+                    Could not load access logs.
+                </td>
+
+            </tr>
+
+        `;
+
+
+        errorBox.textContent =
+            "Could not load /api/logs. Check the Flask terminal for the error.";
+
+
+        errorBox.style.display =
+            "block";
+
+
+    }
+
+}
+
+
+
+/* =========================
+   Events
+========================= */
+
+
+document.getElementById(
+    "search"
+).addEventListener(
+    "input",
+    () => {
+
+
+        clearTimeout(
+            searchTimer
+        );
+
+
+        searchTimer =
+            setTimeout(
+                loadLogs,
+                250
+            );
+
+
+    }
+);
+
+
+
+document.getElementById(
+    "status"
+).addEventListener(
+    "change",
+    loadLogs
+);
+
+
+
+document.getElementById(
+    "date"
+).addEventListener(
+    "change",
+    loadLogs
+);
+
+
+
+document.getElementById(
+    "clear-filters"
+).addEventListener(
+    "click",
+    () => {
+
+
+        document.getElementById(
+            "search"
+        ).value =
+            "";
+
+
+        document.getElementById(
+            "status"
+        ).value =
+            "all";
+
+
+        document.getElementById(
+            "date"
+        ).value =
+            "";
+
+
+        window.history.replaceState(
+            {},
+            "",
+            "/logs"
+        );
+
+
+        loadLogs();
+
+
+    }
+);
+
+
+
+/* =========================
+   Start
+========================= */
+
+
+loadFiltersFromUrl();
+
+
+loadLogs();
+
+
+setInterval(
+    loadLogs,
+    3000
+);
+
+
+</script>
+
+
+</body>
+
+</html>

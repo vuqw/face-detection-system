@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Register Person - FaceAccess</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        :root {
+
+            --background: #f4f6fa;
+            --surface: #ffffff;
+
+            --text: #111827;
+            --muted: #6b7280;
+
+            --border: #e5e7eb;
+
+            --dark: #111827;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background: var(--background);
+
+            color: var(--text);
+
+        }
+
+
+        .app {
+
+            min-height: 100vh;
+
+            display: flex;
+
+        }
+
+
+        /* Sidebar */
+
+        .sidebar {
+
+            width: 250px;
+
+            background: #111827;
+
+            color: white;
+
+            padding: 28px 20px;
+
+            position: fixed;
+
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 40px;
+
+        }
+
+
+        .brand-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #3b82f6,
+                    #8b5cf6
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 21px;
+
+        }
+
+
+        .brand-title {
+
+            font-size: 17px;
+
+            font-weight: 700;
+
+        }
+
+
+        .brand-subtitle {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            margin-top: 2px;
+
+        }
+
+
+        .nav-label {
+
+            color: #6b7280;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            margin:
+                15px
+                10px
+                8px;
+
+        }
+
+
+        .nav-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 12px 14px;
+
+            border-radius: 10px;
+
+            color: #d1d5db;
+
+            text-decoration: none;
+
+            margin-bottom: 5px;
+
+            font-size: 14px;
+
+        }
+
+
+        .nav-item:hover,
+        .nav-item.active {
+
+            background: #1f2937;
+
+            color: white;
+
+        }
+
+
+        /* Main */
+
+        .main {
+
+            margin-left: 250px;
+
+            width:
+                calc(
+                    100% - 250px
+                );
+
+            padding: 35px;
+
+        }
+
+
+        .page-header {
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .back {
+
+            display: inline-block;
+
+            text-decoration: none;
+
+            color: #6b7280;
+
+            font-size: 14px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .back:hover {
+
+            color: #111827;
+
+        }
+
+
+        h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+        }
+
+
+        .subtitle {
+
+            color: #6b7280;
+
+            margin-top: 7px;
+
+            font-size: 14px;
+
+        }
+
+
+        /* Layout */
+
+        .register-layout {
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1.3fr)
+                minmax(300px, 0.7fr);
+
+            gap: 20px;
+
+            max-width: 1000px;
+
+        }
+
+
+        /* Main Card */
+
+        .register-card {
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 16px;
+
+            padding: 28px;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0,0,0,0.03);
+
+        }
+
+
+        .card-title {
+
+            font-size: 18px;
+
+            font-weight: 650;
+
+        }
+
+
+        .card-description {
+
+            color: #6b7280;
+
+            font-size: 13px;
+
+            margin-top: 6px;
+
+            margin-bottom: 28px;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            margin-bottom: 8px;
+
+        }
+
+
+        input {
+
+            width: 100%;
+
+            height: 46px;
+
+            border:
+                1px solid
+                #d1d5db;
+
+            border-radius: 10px;
+
+            padding:
+                0 14px;
+
+            font-size: 15px;
+
+            outline: none;
+
+            transition: 0.15s;
+
+        }
+
+
+        input:focus {
+
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(
+                    37,
+                    99,
+                    235,
+                    0.1
+                );
+
+        }
+
+
+        .help {
+
+            color: #9ca3af;
+
+            font-size: 12px;
+
+            margin-top: 7px;
+
+        }
+
+
+        .submit-btn {
+
+            width: 100%;
+
+            margin-top: 24px;
+
+            border: 0;
+
+            background: #111827;
+
+            color: white;
+
+            height: 46px;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            transition: 0.2s;
+
+        }
+
+
+        .submit-btn:hover {
+
+            background: #1f2937;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        /* Information */
+
+        .info-card {
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #111827,
+                    #1f2937
+                );
+
+            color: white;
+
+            border-radius: 16px;
+
+            padding: 26px;
+
+            height: fit-content;
+
+        }
+
+
+        .info-icon {
+
+            width: 48px;
+            height: 48px;
+
+            border-radius: 13px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.08
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 22px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .info-title {
+
+            font-size: 17px;
+
+            font-weight: 650;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .step {
+
+            display: flex;
+
+            gap: 12px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .step-number {
+
+            flex-shrink: 0;
+
+            width: 26px;
+            height: 26px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.1
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+        }
+
+
+        .step-text {
+
+            color: #d1d5db;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+        }
+
+
+        .flash-message {
+
+            max-width: 1000px;
+
+            background: #fee2e2;
+
+            color: #991b1b;
+
+            border:
+                1px solid
+                #fecaca;
+
+            padding: 13px 15px;
+
+            border-radius: 10px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        @media (
+            max-width: 900px
+        ) {
+
+            .sidebar {
+
+                display: none;
+
+            }
+
+
+            .main {
+
+                margin-left: 0;
+
+                width: 100%;
+
+            }
+
+
+            .register-layout {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+
+        @media (
+            max-width: 600px
+        ) {
+
+            .main {
+
+                padding: 22px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <aside class="sidebar">
+
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ◉
+            </div>
+
+
+            <div>
+
+                <div class="brand-title">
+                    FaceAccess
+                </div>
+
+                <div class="brand-subtitle">
+                    Smart Security
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="nav-label">
+            Main
+        </div>
+
+
+        <a
+            class="nav-item"
+            href="/"
+        >
+            ▦ Dashboard
+        </a>
+
+
+        <a
+            class="nav-item active"
+            href="/register"
+        >
+            ＋ Register Person
+        </a>
+
+
+    </aside>
+
+
+
+    <main class="main">
+
+
+        <div class="page-header">
+
+            <a
+                href="/"
+                class="back"
+            >
+                ← Back to Dashboard
+            </a>
+
+
+            <h1>
+                Register New Person
+            </h1>
+
+
+            <div class="subtitle">
+                Add a new person to the facial recognition system.
+            </div>
+
+        </div>
+
+
+        {% with messages = get_flashed_messages() %}
+
+            {% if messages %}
+
+                {% for message in messages %}
+
+                    <div class="flash-message">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <div class="register-layout">
+
+
+            <div class="register-card">
+
+
+                <div class="card-title">
+                    Person Information
+                </div>
+
+
+                <div class="card-description">
+                    Enter a name before starting face registration.
+                </div>
+
+
+                <form method="POST">
+
+
+                    <label for="name">
+                        Person Name
+                    </label>
+
+
+                    <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Example: Ahmed"
+                        autocomplete="off"
+                        required
+                        autofocus
+                    >
+
+
+                    <div class="help">
+                        This name will be shown in access logs and recognition results.
+                    </div>
+
+
+                    <button
+                        class="submit-btn"
+                        type="submit"
+                    >
+                        Start Face Registration →
+                    </button>
+
+
+                </form>
+
+
+            </div>
+
+
+
+            <div class="info-card">
+
+
+                <div class="info-icon">
+                    ◉
+                </div>
+
+
+                <div class="info-title">
+                    Registration Process
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        1
+                    </div>
+
+                    <div class="step-text">
+                        Enter the person's name and start registration.
+                    </div>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        2
+                    </div>
+
+                    <div class="step-text">
+                        The camera window will open automatically.
+                    </div>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        3
+                    </div>
+
+                    <div class="step-text">
+                        Press S when the person is ready.
+                    </div>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        4
+                    </div>
+
+                    <div class="step-text">
+                        Five face samples will be captured from slightly different angles.
+                    </div>
+
+                </div>
+
+
+                <div class="step">
+
+                    <div class="step-number">
+                        5
+                    </div>
+
+                    <div class="step-text">
+                        The person will automatically appear in the dashboard.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+</body>
+
+</html>

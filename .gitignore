@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+
+registered_faces/
+access_snapshots/
+access_system.db
